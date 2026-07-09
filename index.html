@@ -9,71 +9,44 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#EEF1F5;
-    --surface:#FFFFFF;
-    --ink:#14161A;
-    --muted:#5E6672;
-    --line:#DCE1E8;
-    --accent:#0064B4;
-    --accent-ink:#004E8C;
-    --ok:#1E8A82;
-    --err:#B23A48;
-
-    --seg-g:#0064B4;
-    --seg-y:#1E8A82;
-    --seg-m:#B07A1E;
-    --seg-d:#6E52A8;
-    --seg-s:#A84E68;
-    --seg-c:#14161A;
-
+    --paper:#EEF1F5;--surface:#FFFFFF;--ink:#14161A;--muted:#5E6672;--line:#DCE1E8;
+    --accent:#0064B4;--accent-ink:#004E8C;--ok:#1E8A82;--err:#B23A48;
+    --seg-g:#0064B4;--seg-y:#1E8A82;--seg-m:#B07A1E;--seg-d:#6E52A8;--seg-s:#A84E68;--seg-c:#14161A;
     --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
     --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
   }
-
   *{box-sizing:border-box;}
   html,body{margin:0;}
-  body{
-    background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;
-    -webkit-font-smoothing:antialiased;padding:32px 20px 64px;
-  }
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased;padding:32px 20px 64px;}
   .wrap{max-width:720px;margin:0 auto;}
 
   header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px;}
   h1{font-size:22px;font-weight:600;letter-spacing:-0.01em;margin:0;}
   .sub{color:var(--muted);font-size:13px;margin-top:2px;}
-  .tag{
-    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
-    color:var(--accent-ink);border:1px solid var(--line);background:var(--surface);
-    padding:5px 9px;border-radius:6px;white-space:nowrap;
-  }
+  .tag{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent-ink);border:1px solid var(--line);background:var(--surface);padding:5px 9px;border-radius:6px;white-space:nowrap;}
 
   .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;}
+  .card + .card{margin-top:20px;}
+  .ctitle{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);padding:16px 18px 0;}
 
-  .controls{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;margin-bottom:20px;}
+  .controls{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;}
   .field{display:flex;flex-direction:column;gap:7px;}
   .field.full{grid-column:1 / -1;}
   label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0.02em;}
 
   .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
-  .seg button{
-    flex:1;border:0;background:var(--surface);color:var(--muted);font-family:var(--sans);font-size:14px;
-    padding:9px 4px;cursor:pointer;border-right:1px solid var(--line);transition:background .12s,color .12s;
-  }
+  .seg button{flex:1;border:0;background:var(--surface);color:var(--muted);font-family:var(--sans);font-size:14px;padding:9px 4px;cursor:pointer;border-right:1px solid var(--line);transition:background .12s,color .12s;}
   .seg button:last-child{border-right:0;}
   .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:500;}
 
   .row2{display:flex;gap:10px;align-items:center;}
-  input[type=number],input[type=text]{
-    width:100%;font-family:var(--mono);font-size:15px;color:var(--ink);
-    border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);-moz-appearance:textfield;
-  }
-  input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
+  input[type=number],input[type=text]{width:100%;font-family:var(--mono);font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);-moz-appearance:textfield;}
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
   .dash{color:var(--muted);}
+  .check{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);cursor:pointer;align-self:flex-end;padding-bottom:9px;}
+  .check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
 
-  .generate{
-    grid-column:1 / -1;background:var(--accent);color:#fff;border:0;border-radius:9px;
-    font-family:var(--sans);font-size:15px;font-weight:600;padding:12px;cursor:pointer;transition:background .12s,transform .06s;
-  }
+  .generate{grid-column:1 / -1;background:var(--accent);color:#fff;border:0;border-radius:9px;font-family:var(--sans);font-size:15px;font-weight:600;padding:12px;cursor:pointer;transition:background .12s,transform .06s;}
   .generate:hover{background:var(--accent-ink);}
   .generate:active{transform:translateY(1px);}
 
@@ -81,10 +54,7 @@
   .anatomy .cap{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:14px;}
   .code-row{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;}
   .grp{display:flex;flex-direction:column;align-items:center;gap:8px;}
-  .grp .digits{
-    font-family:var(--mono);font-size:clamp(24px,7vw,38px);font-weight:500;letter-spacing:0.02em;
-    padding-bottom:6px;border-bottom:3px solid;line-height:1;
-  }
+  .grp .digits{font-family:var(--mono);font-size:clamp(24px,7vw,38px);font-weight:500;letter-spacing:0.02em;padding-bottom:6px;border-bottom:3px solid;line-height:1;}
   .grp .lab{font-size:10.5px;letter-spacing:0.02em;color:var(--muted);max-width:9ch;}
   .g-g .digits{color:var(--seg-g);border-color:var(--seg-g);}
   .g-y .digits{color:var(--seg-y);border-color:var(--seg-y);}
@@ -94,41 +64,56 @@
   .g-c .digits{color:var(--seg-c);border-color:var(--seg-c);}
   .meta{margin-top:16px;font-size:13px;color:var(--muted);}
   .meta b{color:var(--ink);font-weight:500;}
+  .meta .ib{font-family:var(--mono);}
 
-  .list-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;}
-  .list-head span{font-size:12px;color:var(--muted);letter-spacing:0.02em;}
-  .copyall{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--accent-ink);background:none;border:0;cursor:pointer;padding:4px 2px;}
-  .copyall:hover{text-decoration:underline;}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;flex-wrap:wrap;}
+  .toolbar .cnt{font-size:12px;color:var(--muted);}
+  .exp{display:flex;gap:6px;flex-wrap:wrap;}
+  .exp button{font-family:var(--mono);font-size:12px;color:var(--accent-ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;transition:.12s;}
+  .exp button:hover{border-color:var(--accent);}
+  .exp button.ok{border-color:var(--ok);color:var(--ok);}
+
   ul{list-style:none;margin:0;padding:0 6px 8px;}
   li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-top:1px solid var(--line);animation:fade .28s ease both;}
   li:first-child{border-top:0;}
-  .entry{display:flex;flex-direction:column;gap:2px;}
+  .entry{display:flex;flex-direction:column;gap:2px;min-width:0;}
   .val{font-family:var(--mono);font-size:16px;letter-spacing:0.03em;}
   .who{font-size:12px;color:var(--muted);}
+  .iban{font-family:var(--mono);font-size:12px;color:var(--muted);}
+  .actions{display:flex;gap:6px;flex-shrink:0;}
   .copy{font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;transition:.12s;}
   .copy:hover{border-color:var(--accent);color:var(--accent-ink);}
   .copy.ok{border-color:var(--ok);color:var(--ok);}
-  .actions{display:flex;gap:6px;flex-shrink:0;}
 
-  .validator{margin-top:20px;padding:18px;}
-  .validator > label{display:block;margin-bottom:9px;}
-  .vrow{display:flex;gap:10px;}
-  .vrow input{flex:1;letter-spacing:0.06em;}
+  .valwrap{padding:16px 18px 18px;}
+  textarea{width:100%;min-height:84px;resize:vertical;font-family:var(--mono);font-size:14px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px 11px;background:var(--surface);line-height:1.6;}
+  .vbtnrow{display:flex;gap:10px;margin-top:10px;}
   .vbtn{background:var(--ink);color:#fff;border:0;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:9px 16px;cursor:pointer;}
   .vbtn:hover{background:#000;}
-  .vresult{margin-top:12px;font-size:13.5px;min-height:1.2em;display:none;}
+  .vresult{margin-top:14px;font-size:13.5px;display:none;}
   .vresult.show{display:block;animation:fade .2s ease both;}
-  .vresult .badge{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:3px 7px;border-radius:5px;margin-right:8px;}
-  .vresult.good .badge{background:rgba(30,138,130,.12);color:var(--ok);}
-  .vresult.bad .badge{background:rgba(178,58,72,.12);color:var(--err);}
-  .vresult b{color:var(--ink);font-weight:500;}
+  .badge{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:3px 7px;border-radius:5px;}
+  .b-ok{background:rgba(30,138,130,.12);color:var(--ok);}
+  .b-bad{background:rgba(178,58,72,.12);color:var(--err);}
+  .single b{color:var(--ink);font-weight:500;}
+  .single .badge{margin-right:8px;}
+  .vlist{display:flex;flex-direction:column;}
+  .vitem{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13px;}
+  .vitem:first-child{border-top:0;}
+  .vitem .c{font-family:var(--mono);letter-spacing:0.03em;}
+  .vitem .why{color:var(--muted);font-size:12px;margin-left:auto;}
+  .vsum{font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .vsum b{color:var(--ink);font-weight:600;}
+  .kv{margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:13px;}
+  .kv dt{color:var(--muted);}
+  .kv dd{margin:0;color:var(--ink);font-family:var(--mono);word-break:break-all;}
 
   .foot{margin-top:20px;font-size:12px;color:var(--muted);line-height:1.6;}
   .foot code{font-family:var(--mono);background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:4px;font-size:11.5px;}
 
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
   @media (prefers-reduced-motion:reduce){li,.vresult.show{animation:none;}.generate:active{transform:none;}}
-  @media (max-width:520px){.controls{grid-template-columns:1fr;}}
+  @media (max-width:520px){.controls{grid-template-columns:1fr;}.check{align-self:flex-start;padding-bottom:0;}}
 </style>
 </head>
 <body>
@@ -136,7 +121,7 @@
   <header>
     <div>
       <h1>Isikukoodi generaator</h1>
-      <div class="sub">Kehtiva kontrollnumbriga testkoodid ja fiktiivsed nimed</div>
+      <div class="sub">Kehtivad testkoodid, fiktiivsed identiteedid ja eksport</div>
     </div>
     <div class="tag">ainult testimiseks</div>
   </header>
@@ -160,68 +145,115 @@
     </div>
     <div class="field">
       <label>Kogus</label>
-      <input type="number" id="count" value="5" min="1" max="100">
+      <input type="number" id="count" value="5" min="1" max="500">
     </div>
+    <div class="field">
+      <label>Seeme (valikuline)</label>
+      <input type="text" id="seed" placeholder="tühi = juhuslik" autocomplete="off">
+    </div>
+    <label class="check"><input type="checkbox" id="ibanToggle" checked> Lisa test-IBAN</label>
     <button class="generate" id="gen">Genereeri</button>
   </div>
 
   <div class="card" id="output" hidden>
     <div class="anatomy" id="anatomy"></div>
-    <div class="list-head">
-      <span id="listCap"></span>
-      <button class="copyall" id="copyAll">Kopeeri kõik (TSV)</button>
+    <div class="toolbar">
+      <span class="cnt" id="listCap"></span>
+      <div class="exp">
+        <button id="copyAll">Kopeeri (TSV)</button>
+        <button id="expCsv">CSV</button>
+        <button id="expJson">JSON</button>
+        <button id="expSql">SQL</button>
+      </div>
     </div>
     <ul id="list"></ul>
   </div>
 
-  <div class="card validator">
-    <label for="vinput">Kontrolli isikukoodi</label>
-    <div class="vrow">
-      <input type="text" id="vinput" placeholder="nt 39912315231" maxlength="11" inputmode="numeric" autocomplete="off">
-      <button class="vbtn" id="vbtn">Kontrolli</button>
+  <div class="card">
+    <div class="ctitle">Valideerija</div>
+    <div class="valwrap">
+      <label for="vinput" style="display:block;margin-bottom:8px;">Kontrolli üht koodi või kleebi terve loend</label>
+      <textarea id="vinput" placeholder="39912315231&#10;60001010000&#10;..."></textarea>
+      <div class="vbtnrow"><button class="vbtn" id="vbtn">Kontrolli</button></div>
+      <div class="vresult" id="vresult"></div>
     </div>
-    <div class="vresult" id="vresult"></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">IBAN-i kontroll</div>
+    <div class="valwrap">
+      <label for="ibinput" style="display:block;margin-bottom:8px;">Sisesta IBAN — tuvastame riigi, panga ja kontrollime kehtivust</label>
+      <input type="text" id="ibinput" placeholder="EE38 2200 2210 2014 5685" autocomplete="off">
+      <div class="vbtnrow"><button class="vbtn" id="ibbtn">Kontrolli</button></div>
+      <div class="vresult" id="ibresult"></div>
+    </div>
   </div>
 
   <p class="foot">
-    Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — esimene number kodeerib sajandi ja soo,
-    seejärel sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
-    Koodid ja nimed on juhuslikult loodud ega vasta ühelegi tegelikule isikule.
+    Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — sajand ja sugu, sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
+    IBAN-id kannavad kehtivat mod-97 kontrollnumbrit. Kõik andmed on juhuslikult loodud ega vasta ühelegi tegelikule isikule ega kontole.
   </p>
 </div>
 
 <script>
-  // ---------- kontrollnumber ----------
-  function isikukoodCheckDigit(first10){
-    const w1=[1,2,3,4,5,6,7,8,9,1], w2=[3,4,5,6,7,8,9,1,2,3];
-    let s=0; for(let i=0;i<10;i++) s+=first10[i]*w1[i];
-    let m=s%11; if(m<10) return m;
-    s=0; for(let i=0;i<10;i++) s+=first10[i]*w2[i];
-    m=s%11; return m<10 ? m : 0;
+  // ---------- juhuslikkus (valikuline seeme) ----------
+  function xmur3(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0;};}
+  function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296;};}
+  let RNG=Math.random;
+  const rnd=n=>Math.floor(RNG()*n);
+  const pick=a=>a[rnd(a.length)];
+  const pad=(n,l)=>String(n).padStart(l,'0');
+
+  // ---------- kontrollnumber + valideerimine ----------
+  function isikukoodCheckDigit(f){const w1=[1,2,3,4,5,6,7,8,9,1],w2=[3,4,5,6,7,8,9,1,2,3];let s=0;for(let i=0;i<10;i++)s+=f[i]*w1[i];let m=s%11;if(m<10)return m;s=0;for(let i=0;i<10;i++)s+=f[i]*w2[i];m=s%11;return m<10?m:0;}
+  function validateIsikukood(code){
+    if(typeof code!=='string'||!/^\d{11}$/.test(code))return{valid:false,error:'Peab olema 11 numbrit'};
+    const d=code.split('').map(Number),g=d[0];
+    if(g<1||g>8)return{valid:false,error:'Vigane sajandi/soo number'};
+    const base={1:1800,2:1800,3:1900,4:1900,5:2000,6:2000,7:2100,8:2100}[g];
+    const year=base+d[1]*10+d[2],month=d[3]*10+d[4],day=d[5]*10+d[6];
+    if(month<1||month>12)return{valid:false,error:'Vigane kuu'};
+    const dim=new Date(year,month,0).getDate();
+    if(day<1||day>dim)return{valid:false,error:'Vigane päev'};
+    if(isikukoodCheckDigit(d.slice(0,10))!==d[10])return{valid:false,error:'Vale kontrollnumber'};
+    return{valid:true,gender:g%2===1?'mees':'naine',birthDate:year+'-'+pad(month,2)+'-'+pad(day,2),serial:d[7]*100+d[8]*10+d[9]};
   }
 
-  // ---------- valideerimine ----------
-  function validateIsikukood(code){
-    if(typeof code!=='string' || !/^\d{11}$/.test(code))
-      return {valid:false, error:'Peab olema täpselt 11 numbrit'};
-    const d=code.split('').map(Number);
-    const g=d[0];
-    if(g<1||g>8) return {valid:false, error:'Vigane sajandi/soo number (1–8)'};
-    const base={1:1800,2:1800,3:1900,4:1900,5:2000,6:2000,7:2100,8:2100}[g];
-    const year=base + d[1]*10 + d[2];
-    const month=d[3]*10 + d[4];
-    const day=d[5]*10 + d[6];
-    if(month<1||month>12) return {valid:false, error:'Vigane kuu'};
-    const dim=new Date(year,month,0).getDate();
-    if(day<1||day>dim) return {valid:false, error:'Vigane päev'};
-    if(isikukoodCheckDigit(d.slice(0,10))!==d[10])
-      return {valid:false, error:'Vale kontrollnumber'};
-    return {
-      valid:true,
-      gender: g%2===1 ? 'mees' : 'naine',
-      birthDate: year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'),
-      serial: d[7]*100 + d[8]*10 + d[9]
-    };
+  // ---------- IBAN ----------
+  const BANKS=["10","17","22","42","77"]; // SEB, Luminor, Swedbank, Coop, LHV
+  function ibanDomesticCheck(body15){const w=[7,3,1];let s=0;for(let i=0;i<body15.length;i++)s+=Number(body15[i])*w[i%3];return (10-(s%10))%10;}
+  function generateIBAN(){
+    const bank=pick(BANKS);let acc="";for(let i=0;i<13;i++)acc+=rnd(10);
+    const body=bank+acc,bban=body+ibanDomesticCheck(body),numeric=bban+"141400";
+    let rem=0;for(const d of numeric)rem=(rem*10+Number(d))%97;
+    return "EE"+pad(98-rem,2)+bban;
+  }
+
+  // Eesti pangakoodid (IBAN-i 5.-6. number) ja üldine mod-97 kontroll
+  const EE_BANKS={
+    '10':{name:'SEB Pank',bic:'EEUHEE2X'},
+    '17':{name:'Luminor Bank',bic:'RIKOEE22'},
+    '22':{name:'Swedbank',bic:'HABAEE2X'},
+    '42':{name:'Coop Pank',bic:'EKRDEE22'},
+    '77':{name:'LHV Pank',bic:'LHVBEE22'},
+    '96':{name:'Luminor Bank (end. Nordea)',bic:'RIKOEE22'}
+  };
+  const IBAN_LEN={AD:24,AT:20,BE:16,BG:22,CH:21,CY:28,CZ:24,DE:22,DK:18,EE:20,ES:24,FI:18,FR:27,GB:22,GR:27,HR:21,HU:28,IE:22,IS:26,IT:27,LI:21,LT:20,LU:20,LV:21,MC:27,MT:31,NL:18,NO:15,PL:28,PT:25,RO:24,SE:24,SI:19,SK:24};
+  const COUNTRY={EE:'Eesti',FI:'Soome',LV:'Läti',LT:'Leedu',SE:'Rootsi',NO:'Norra',DK:'Taani',DE:'Saksamaa',GB:'Ühendkuningriik',NL:'Holland',FR:'Prantsusmaa',ES:'Hispaania',IT:'Itaalia',PL:'Poola',BE:'Belgia',AT:'Austria',IE:'Iirimaa',PT:'Portugal',CH:'Šveits'};
+  function ibanMod97(s){let rem=0;for(const ch of s){const c=ch.charCodeAt(0);const v=c>=65?c-55:c-48;rem=(v>9)?(rem*100+v)%97:(rem*10+v)%97;}return rem;}
+  function validateIBAN(input){
+    const iban=String(input).replace(/\s+/g,'').toUpperCase();
+    if(!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(iban)) return {valid:false,error:'Vigane IBAN-i formaat'};
+    const country=iban.slice(0,2), expLen=IBAN_LEN[country];
+    if(expLen && iban.length!==expLen) return {valid:false,error:country+' IBAN peab olema '+expLen+' märki (sisestatud '+iban.length+')'};
+    if(ibanMod97(iban.slice(4)+iban.slice(0,4))!==1) return {valid:false,error:'Vale kontrollnumber (mod-97)'};
+    const info={valid:true,iban,formatted:iban.replace(/(.{4})/g,'$1 ').trim(),country,countryName:COUNTRY[country]||country,checkDigits:iban.slice(2,4),bban:iban.slice(4)};
+    if(country==='EE'){
+      const bc=iban.slice(4,6), b=EE_BANKS[bc];
+      info.bankCode=bc; info.bankName=b?b.name:'tundmatu pank'; if(b)info.bic=b.bic;
+      info.accountNumber=iban.slice(6);
+    }
+    return info;
   }
 
   // ---------- nimed ----------
@@ -230,105 +262,135 @@
     f:["Kadri","Mari","Tiiu","Anne","Liis","Katrin","Maarja","Kristiina","Piret","Riina","Kersti","Tuuli","Eve","Helen","Laura","Kätlin","Triin","Sofia","Eliise","Kaisa","Karin","Merike","Reet","Tiina"],
     last:["Tamm","Saar","Sepp","Mägi","Kask","Kukk","Rebane","Ilves","Pärn","Koppel","Lepik","Raudsepp","Karu","Vaher","Uibo","Kangur","Lill","Kuusk","Palm","Oja","Nurm","Lind","Mets","Kivi","Põld","Teder","Randmaa","Kütt","Org","Susi"]
   };
-  const rnd=n=>Math.floor(Math.random()*n);
-  const pad=(n,l)=>String(n).padStart(l,'0');
-  const pick=a=>a[rnd(a.length)];
-  const randomName=isMale=>pick(isMale?NAMES.m:NAMES.f)+' '+pick(NAMES.last);
 
   // ---------- koodi genereerimine ----------
   function daysInMonth(y,m){return new Date(y,m,0).getDate();}
-  function centuryDigit(year,isMale){
-    const base={18:1,19:3,20:5,21:7}[Math.floor(year/100)];
-    return base+(isMale?0:1);
-  }
-  function generateOne(yFrom,yTo,pref){
-    const year=yFrom+rnd(yTo-yFrom+1);
-    const month=1+rnd(12);
-    const day=1+rnd(daysInMonth(year,month));
-    const isMale=pref==='m'?true:pref==='f'?false:Math.random()<0.5;
-    const serial=rnd(1000);
+  function centuryDigit(year,isMale){return {18:1,19:3,20:5,21:7}[Math.floor(year/100)]+(isMale?0:1);}
+  function generateOne(yFrom,yTo,pref,withIban){
+    const year=yFrom+rnd(yTo-yFrom+1),month=1+rnd(12),day=1+rnd(daysInMonth(year,month));
+    const isMale=pref==='m'?true:pref==='f'?false:RNG()<0.5,serial=rnd(1000);
     const g=centuryDigit(year,isMale);
     const parts={g:String(g),y:pad(year%100,2),m:pad(month,2),d:pad(day,2),s:pad(serial,3)};
     const first10=(parts.g+parts.y+parts.m+parts.d+parts.s).split('').map(Number);
     parts.c=String(isikukoodCheckDigit(first10));
-    return {code:parts.g+parts.y+parts.m+parts.d+parts.s+parts.c,parts,year,month,day,isMale,name:randomName(isMale)};
+    const eesnimi=pick(isMale?NAMES.m:NAMES.f),perekonnanimi=pick(NAMES.last);
+    const item={code:parts.g+parts.y+parts.m+parts.d+parts.s+parts.c,parts,year,month,day,isMale,eesnimi,perekonnanimi,name:eesnimi+' '+perekonnanimi};
+    if(withIban) item.iban=generateIBAN();
+    return item;
   }
 
-  // ---------- UI ----------
+  // ---------- eksport ----------
+  let current=[];
+  function toRows(items){
+    return items.map(it=>{
+      const r={isikukood:it.code,eesnimi:it.eesnimi,perekonnanimi:it.perekonnanimi,sugu:it.isMale?'M':'N',synniaeg:it.year+'-'+pad(it.month,2)+'-'+pad(it.day,2)};
+      if(it.iban) r.iban=it.iban;
+      return r;
+    });
+  }
+  function toCSV(rs){const cols=Object.keys(rs[0]);const esc=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;return [cols.join(','),...rs.map(r=>cols.map(c=>esc(r[c])).join(','))].join('\n');}
+  function toSQL(rs){const cols=Object.keys(rs[0]);const q=v=>"'"+String(v).replace(/'/g,"''")+"'";const vals=rs.map(r=>'  ('+cols.map(c=>q(r[c])).join(', ')+')').join(',\n');return 'INSERT INTO isikud ('+cols.join(', ')+') VALUES\n'+vals+';';}
+  function download(name,text,mime){const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
+  function flash(btn,label){const old=btn.textContent;btn.textContent=label;btn.classList.add('ok');setTimeout(()=>{btn.textContent=old;btn.classList.remove('ok');},1100);}
+
+  // ---------- UI: generaator ----------
   let genderPref='any';
   const genderEl=document.getElementById('gender');
-  genderEl.addEventListener('click',e=>{
-    const b=e.target.closest('button'); if(!b) return;
-    genderPref=b.dataset.g;
-    [...genderEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
-  });
-
+  genderEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;genderPref=b.dataset.g;[...genderEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));});
   const MONTHS=['jaan','veebr','märts','apr','mai','juuni','juuli','aug','sept','okt','nov','dets'];
+
+  function copyText(txt,btn,ok){navigator.clipboard.writeText(txt).then(()=>flash(btn,ok));}
 
   function renderAnatomy(it){
     const p=it.parts;
     const groups=[['g','sajand & sugu',p.g],['y','aasta',p.y],['m','kuu',p.m],['d','päev',p.d],['s','järjekord',p.s],['c','kontroll',p.c]];
     const row=groups.map(([k,lab,val])=>`<div class="grp g-${k}"><div class="digits">${val}</div><div class="lab">${lab}</div></div>`).join('');
     const sugu=it.isMale?'mees':'naine';
-    document.getElementById('anatomy').innerHTML=
-      `<div class="cap">Koodi ülesehitus</div><div class="code-row">${row}</div>`+
-      `<div class="meta"><b>${it.name}</b> · ${sugu} · sündinud <b>${it.day}. ${MONTHS[it.month-1]} ${it.year}</b></div>`;
-  }
-
-  function copyText(txt,btn,ok){
-    navigator.clipboard.writeText(txt).then(()=>{
-      const old=btn.textContent; btn.textContent=ok; btn.classList.add('ok');
-      setTimeout(()=>{btn.textContent=old;btn.classList.remove('ok');},1100);
-    });
+    let meta=`<b>${it.name}</b> · ${sugu} · sündinud <b>${it.day}. ${MONTHS[it.month-1]} ${it.year}</b>`;
+    if(it.iban) meta+=` · <span class="ib">${it.iban}</span>`;
+    document.getElementById('anatomy').innerHTML=`<div class="cap">Koodi ülesehitus</div><div class="code-row">${row}</div><div class="meta">${meta}</div>`;
   }
 
   function render(items){
+    current=items;
     document.getElementById('output').hidden=false;
     renderAnatomy(items[0]);
     document.getElementById('listCap').textContent=items.length+(items.length===1?' kirje':' kirjet');
-    const ul=document.getElementById('list'); ul.innerHTML='';
+    const ul=document.getElementById('list');ul.innerHTML='';
     items.forEach(it=>{
       const li=document.createElement('li');
-      li.innerHTML=`<div class="entry"><span class="val">${it.code}</span><span class="who">${it.name}</span></div>`;
-      const actions=document.createElement('div'); actions.className='actions';
-      const bc=document.createElement('button'); bc.className='copy'; bc.textContent='kood';
-      bc.onclick=()=>copyText(it.code,bc,'✓');
-      const bn=document.createElement('button'); bn.className='copy'; bn.textContent='nimi';
-      bn.onclick=()=>copyText(it.name,bn,'✓');
-      actions.appendChild(bc); actions.appendChild(bn);
-      li.appendChild(actions); ul.appendChild(li);
+      let entry=`<span class="val">${it.code}</span><span class="who">${it.name}</span>`;
+      if(it.iban) entry+=`<span class="iban">${it.iban}</span>`;
+      li.innerHTML=`<div class="entry">${entry}</div>`;
+      const actions=document.createElement('div');actions.className='actions';
+      const bc=document.createElement('button');bc.className='copy';bc.textContent='kood';bc.onclick=()=>copyText(it.code,bc,'✓');
+      const bn=document.createElement('button');bn.className='copy';bn.textContent='nimi';bn.onclick=()=>copyText(it.name,bn,'✓');
+      actions.appendChild(bc);actions.appendChild(bn);
+      if(it.iban){const bi=document.createElement('button');bi.className='copy';bi.textContent='iban';bi.onclick=()=>copyText(it.iban,bi,'✓');actions.appendChild(bi);}
+      li.appendChild(actions);ul.appendChild(li);
     });
-    document.getElementById('copyAll').onclick=e=>
-      copyText(items.map(i=>i.code+'\t'+i.name).join('\n'),e.target,'✓ kopeeritud');
   }
 
   function run(){
-    let yFrom=+document.getElementById('yFrom').value;
-    let yTo=+document.getElementById('yTo').value;
-    let count=Math.max(1,Math.min(100,+document.getElementById('count').value||1));
-    yFrom=Math.max(1800,Math.min(2199,yFrom));
-    yTo=Math.max(1800,Math.min(2199,yTo));
+    let yFrom=+document.getElementById('yFrom').value,yTo=+document.getElementById('yTo').value;
+    let count=Math.max(1,Math.min(500,+document.getElementById('count').value||1));
+    yFrom=Math.max(1800,Math.min(2199,yFrom));yTo=Math.max(1800,Math.min(2199,yTo));
     if(yFrom>yTo)[yFrom,yTo]=[yTo,yFrom];
-    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref)));
+    const seed=document.getElementById('seed').value.trim();
+    RNG=seed?mulberry32(xmur3(seed)()):Math.random;
+    const withIban=document.getElementById('ibanToggle').checked;
+    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,withIban)));
   }
   document.getElementById('gen').addEventListener('click',run);
 
-  // valideerija UI
+  // ekspordi nupud
+  document.getElementById('copyAll').onclick=e=>copyText(current.map(i=>[i.code,i.name,i.iban].filter(Boolean).join('\t')).join('\n'),e.target,'✓');
+  document.getElementById('expCsv').onclick=()=>download('testandmed.csv',toCSV(toRows(current)),'text/csv');
+  document.getElementById('expJson').onclick=()=>download('testandmed.json',JSON.stringify(toRows(current),null,2),'application/json');
+  document.getElementById('expSql').onclick=e=>copyText(toSQL(toRows(current)),e.target,'✓ SQL');
+
+  // ---------- UI: valideerija (üks või loend) ----------
   const vres=document.getElementById('vresult');
   function doValidate(){
-    const code=document.getElementById('vinput').value.trim();
-    if(!code){vres.className='vresult';return;}
-    const r=validateIsikukood(code);
-    if(r.valid){
-      vres.className='vresult show good';
-      vres.innerHTML=`<span class="badge">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`;
-    }else{
-      vres.className='vresult show bad';
-      vres.innerHTML=`<span class="badge">vigane</span>${r.error}`;
+    const tokens=document.getElementById('vinput').value.split(/[\s,;]+/).filter(Boolean);
+    if(tokens.length===0){vres.className='vresult';return;}
+    if(tokens.length===1){
+      const r=validateIsikukood(tokens[0]);
+      vres.className='vresult show single';
+      vres.innerHTML=r.valid
+        ?`<span class="badge b-ok">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`
+        :`<span class="badge b-bad">vigane</span>${r.error}`;
+      return;
     }
+    let ok=0;
+    const rows=tokens.map(t=>{
+      const r=validateIsikukood(t);if(r.valid)ok++;
+      return `<div class="vitem"><span class="badge ${r.valid?'b-ok':'b-bad'}">${r.valid?'✓':'✕'}</span><span class="c">${t}</span><span class="why">${r.valid?r.birthDate+' · '+r.gender:r.error}</span></div>`;
+    }).join('');
+    vres.className='vresult show';
+    vres.innerHTML=`<div class="vsum"><b>${ok}</b>/${tokens.length} kehtivat</div><div class="vlist">${rows}</div>`;
   }
   document.getElementById('vbtn').addEventListener('click',doValidate);
-  document.getElementById('vinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidate();});
+
+  // ---------- UI: IBAN-i kontroll ----------
+  const ibres=document.getElementById('ibresult');
+  function doValidateIBAN(){
+    const val=document.getElementById('ibinput').value.trim();
+    if(!val){ibres.className='vresult';return;}
+    const r=validateIBAN(val);
+    if(!r.valid){ibres.className='vresult show single';ibres.innerHTML=`<span class="badge b-bad">vigane</span>${r.error}`;return;}
+    const kv=[['Riik',r.countryName+' ('+r.country+')']];
+    if(r.bankName)kv.push(['Pank',r.bankName]);
+    if(r.bic)kv.push(['BIC / SWIFT',r.bic]);
+    if(r.bankCode)kv.push(['Pangakood',r.bankCode]);
+    if(r.accountNumber)kv.push(['Kontonumber',r.accountNumber]);
+    kv.push(['Kontrollnumbrid',r.checkDigits]);
+    ibres.className='vresult show';
+    ibres.innerHTML=`<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>${r.formatted}</b></div>`+
+      '<dl class="kv">'+kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')+'</dl>';
+  }
+  document.getElementById('ibbtn').addEventListener('click',doValidateIBAN);
+  document.getElementById('ibinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidateIBAN();});
 
   run(); // esmane näidis
 </script>
