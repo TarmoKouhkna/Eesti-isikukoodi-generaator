@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isikukoodi generaator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1F5;
+    --surface:#FFFFFF;
+    --ink:#14161A;
+    --muted:#5E6672;
+    --line:#DCE1E8;
+    --accent:#0064B4;
+    --accent-ink:#004E8C;
+    --ok:#1E8A82;
+    --err:#B23A48;
+
+    --seg-g:#0064B4;
+    --seg-y:#1E8A82;
+    --seg-m:#B07A1E;
+    --seg-d:#6E52A8;
+    --seg-s:#A84E68;
+    --seg-c:#14161A;
+
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5;
+    -webkit-font-smoothing:antialiased;padding:32px 20px 64px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:28px;}
+  h1{font-size:22px;font-weight:600;letter-spacing:-0.01em;margin:0;}
+  .sub{color:var(--muted);font-size:13px;margin-top:2px;}
+  .tag{
+    font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;
+    color:var(--accent-ink);border:1px solid var(--line);background:var(--surface);
+    padding:5px 9px;border-radius:6px;white-space:nowrap;
+  }
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;}
+
+  .controls{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;margin-bottom:20px;}
+  .field{display:flex;flex-direction:column;gap:7px;}
+  .field.full{grid-column:1 / -1;}
+  label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0.02em;}
+
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  .seg button{
+    flex:1;border:0;background:var(--surface);color:var(--muted);font-family:var(--sans);font-size:14px;
+    padding:9px 4px;cursor:pointer;border-right:1px solid var(--line);transition:background .12s,color .12s;
+  }
+  .seg button:last-child{border-right:0;}
+  .seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:500;}
+
+  .row2{display:flex;gap:10px;align-items:center;}
+  input[type=number],input[type=text]{
+    width:100%;font-family:var(--mono);font-size:15px;color:var(--ink);
+    border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);-moz-appearance:textfield;
+  }
+  input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
+  .dash{color:var(--muted);}
+
+  .generate{
+    grid-column:1 / -1;background:var(--accent);color:#fff;border:0;border-radius:9px;
+    font-family:var(--sans);font-size:15px;font-weight:600;padding:12px;cursor:pointer;transition:background .12s,transform .06s;
+  }
+  .generate:hover{background:var(--accent-ink);}
+  .generate:active{transform:translateY(1px);}
+
+  .anatomy{padding:22px 18px;text-align:center;border-bottom:1px solid var(--line);}
+  .anatomy .cap{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:14px;}
+  .code-row{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+  .grp{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .grp .digits{
+    font-family:var(--mono);font-size:clamp(24px,7vw,38px);font-weight:500;letter-spacing:0.02em;
+    padding-bottom:6px;border-bottom:3px solid;line-height:1;
+  }
+  .grp .lab{font-size:10.5px;letter-spacing:0.02em;color:var(--muted);max-width:9ch;}
+  .g-g .digits{color:var(--seg-g);border-color:var(--seg-g);}
+  .g-y .digits{color:var(--seg-y);border-color:var(--seg-y);}
+  .g-m .digits{color:var(--seg-m);border-color:var(--seg-m);}
+  .g-d .digits{color:var(--seg-d);border-color:var(--seg-d);}
+  .g-s .digits{color:var(--seg-s);border-color:var(--seg-s);}
+  .g-c .digits{color:var(--seg-c);border-color:var(--seg-c);}
+  .meta{margin-top:16px;font-size:13px;color:var(--muted);}
+  .meta b{color:var(--ink);font-weight:500;}
+
+  .list-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;}
+  .list-head span{font-size:12px;color:var(--muted);letter-spacing:0.02em;}
+  .copyall{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--accent-ink);background:none;border:0;cursor:pointer;padding:4px 2px;}
+  .copyall:hover{text-decoration:underline;}
+  ul{list-style:none;margin:0;padding:0 6px 8px;}
+  li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-top:1px solid var(--line);animation:fade .28s ease both;}
+  li:first-child{border-top:0;}
+  .entry{display:flex;flex-direction:column;gap:2px;}
+  .val{font-family:var(--mono);font-size:16px;letter-spacing:0.03em;}
+  .who{font-size:12px;color:var(--muted);}
+  .copy{font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;transition:.12s;}
+  .copy:hover{border-color:var(--accent);color:var(--accent-ink);}
+  .copy.ok{border-color:var(--ok);color:var(--ok);}
+
+  .validator{margin-top:20px;padding:18px;}
+  .validator > label{display:block;margin-bottom:9px;}
+  .vrow{display:flex;gap:10px;}
+  .vrow input{flex:1;letter-spacing:0.06em;}
+  .vbtn{background:var(--ink);color:#fff;border:0;border-radius:8px;font-family:var(--sans);font-size:14px;font-weight:500;padding:9px 16px;cursor:pointer;}
+  .vbtn:hover{background:#000;}
+  .vresult{margin-top:12px;font-size:13.5px;min-height:1.2em;display:none;}
+  .vresult.show{display:block;animation:fade .2s ease both;}
+  .vresult .badge{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:3px 7px;border-radius:5px;margin-right:8px;}
+  .vresult.good .badge{background:rgba(30,138,130,.12);color:var(--ok);}
+  .vresult.bad .badge{background:rgba(178,58,72,.12);color:var(--err);}
+  .vresult b{color:var(--ink);font-weight:500;}
+
+  .foot{margin-top:20px;font-size:12px;color:var(--muted);line-height:1.6;}
+  .foot code{font-family:var(--mono);background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:4px;font-size:11.5px;}
+
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+  @media (prefers-reduced-motion:reduce){li,.vresult.show{animation:none;}.generate:active{transform:none;}}
+  @media (max-width:520px){.controls{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Isikukoodi generaator</h1>
+      <div class="sub">Kehtiva kontrollnumbriga testkoodid ja fiktiivsed nimed</div>
+    </div>
+    <div class="tag">ainult testimiseks</div>
+  </header>
+
+  <div class="card controls">
+    <div class="field full">
+      <label>Sugu</label>
+      <div class="seg" id="gender">
+        <button data-g="any" aria-pressed="true">Juhuslik</button>
+        <button data-g="m" aria-pressed="false">Mees</button>
+        <button data-g="f" aria-pressed="false">Naine</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Sünniaasta vahemik</label>
+      <div class="row2">
+        <input type="number" id="yFrom" value="1960" min="1800" max="2199">
+        <span class="dash">&ndash;</span>
+        <input type="number" id="yTo" value="2005" min="1800" max="2199">
+      </div>
+    </div>
+    <div class="field">
+      <label>Kogus</label>
+      <input type="number" id="count" value="5" min="1" max="100">
+    </div>
+    <button class="generate" id="gen">Genereeri</button>
+  </div>
+
+  <div class="card" id="output" hidden>
+    <div class="anatomy" id="anatomy"></div>
+    <div class="list-head">
+      <span id="listCap"></span>
+      <button class="copyall" id="copyAll">Kopeeri kõik (TSV)</button>
+    </div>
+    <ul id="list"></ul>
+  </div>
+
+  <div class="card validator">
+    <label for="vinput">Kontrolli isikukoodi</label>
+    <div class="vrow">
+      <input type="text" id="vinput" placeholder="nt 39912315231" maxlength="11" inputmode="numeric" autocomplete="off">
+      <button class="vbtn" id="vbtn">Kontrolli</button>
+    </div>
+    <div class="vresult" id="vresult"></div>
+  </div>
+
+  <p class="foot">
+    Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — esimene number kodeerib sajandi ja soo,
+    seejärel sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
+    Koodid ja nimed on juhuslikult loodud ega vasta ühelegi tegelikule isikule.
+  </p>
+</div>
+
+<script>
+  // ---------- kontrollnumber ----------
+  function isikukoodCheckDigit(first10){
+    const w1=[1,2,3,4,5,6,7,8,9,1], w2=[3,4,5,6,7,8,9,1,2,3];
+    let s=0; for(let i=0;i<10;i++) s+=first10[i]*w1[i];
+    let m=s%11; if(m<10) return m;
+    s=0; for(let i=0;i<10;i++) s+=first10[i]*w2[i];
+    m=s%11; return m<10 ? m : 0;
+  }
+
+  // ---------- valideerimine ----------
+  function validateIsikukood(code){
+    if(typeof code!=='string' || !/^\d{11}$/.test(code))
+      return {valid:false, error:'Peab olema täpselt 11 numbrit'};
+    const d=code.split('').map(Number);
+    const g=d[0];
+    if(g<1||g>8) return {valid:false, error:'Vigane sajandi/soo number (1–8)'};
+    const base={1:1800,2:1800,3:1900,4:1900,5:2000,6:2000,7:2100,8:2100}[g];
+    const year=base + d[1]*10 + d[2];
+    const month=d[3]*10 + d[4];
+    const day=d[5]*10 + d[6];
+    if(month<1||month>12) return {valid:false, error:'Vigane kuu'};
+    const dim=new Date(year,month,0).getDate();
+    if(day<1||day>dim) return {valid:false, error:'Vigane päev'};
+    if(isikukoodCheckDigit(d.slice(0,10))!==d[10])
+      return {valid:false, error:'Vale kontrollnumber'};
+    return {
+      valid:true,
+      gender: g%2===1 ? 'mees' : 'naine',
+      birthDate: year+'-'+String(month).padStart(2,'0')+'-'+String(day).padStart(2,'0'),
+      serial: d[7]*100 + d[8]*10 + d[9]
+    };
+  }
+
+  // ---------- nimed ----------
+  const NAMES={
+    m:["Andres","Toomas","Mart","Priit","Rein","Kristjan","Marek","Indrek","Margus","Aivar","Raivo","Peeter","Kalev","Urmas","Jüri","Madis","Siim","Karl","Rasmus","Markus","Sander","Martin","Henri","Kaarel"],
+    f:["Kadri","Mari","Tiiu","Anne","Liis","Katrin","Maarja","Kristiina","Piret","Riina","Kersti","Tuuli","Eve","Helen","Laura","Kätlin","Triin","Sofia","Eliise","Kaisa","Karin","Merike","Reet","Tiina"],
+    last:["Tamm","Saar","Sepp","Mägi","Kask","Kukk","Rebane","Ilves","Pärn","Koppel","Lepik","Raudsepp","Karu","Vaher","Uibo","Kangur","Lill","Kuusk","Palm","Oja","Nurm","Lind","Mets","Kivi","Põld","Teder","Randmaa","Kütt","Org","Susi"]
+  };
+  const rnd=n=>Math.floor(Math.random()*n);
+  const pad=(n,l)=>String(n).padStart(l,'0');
+  const pick=a=>a[rnd(a.length)];
+  const randomName=isMale=>pick(isMale?NAMES.m:NAMES.f)+' '+pick(NAMES.last);
+
+  // ---------- koodi genereerimine ----------
+  function daysInMonth(y,m){return new Date(y,m,0).getDate();}
+  function centuryDigit(year,isMale){
+    const base={18:1,19:3,20:5,21:7}[Math.floor(year/100)];
+    return base+(isMale?0:1);
+  }
+  function generateOne(yFrom,yTo,pref){
+    const year=yFrom+rnd(yTo-yFrom+1);
+    const month=1+rnd(12);
+    const day=1+rnd(daysInMonth(year,month));
+    const isMale=pref==='m'?true:pref==='f'?false:Math.random()<0.5;
+    const serial=rnd(1000);
+    const g=centuryDigit(year,isMale);
+    const parts={g:String(g),y:pad(year%100,2),m:pad(month,2),d:pad(day,2),s:pad(serial,3)};
+    const first10=(parts.g+parts.y+parts.m+parts.d+parts.s).split('').map(Number);
+    parts.c=String(isikukoodCheckDigit(first10));
+    return {code:parts.g+parts.y+parts.m+parts.d+parts.s+parts.c,parts,year,month,day,isMale,name:randomName(isMale)};
+  }
+
+  // ---------- UI ----------
+  let genderPref='any';
+  const genderEl=document.getElementById('gender');
+  genderEl.addEventListener('click',e=>{
+    const b=e.target.closest('button'); if(!b) return;
+    genderPref=b.dataset.g;
+    [...genderEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+  });
+
+  const MONTHS=['jaan','veebr','märts','apr','mai','juuni','juuli','aug','sept','okt','nov','dets'];
+
+  function renderAnatomy(it){
+    const p=it.parts;
+    const groups=[['g','sajand & sugu',p.g],['y','aasta',p.y],['m','kuu',p.m],['d','päev',p.d],['s','järjekord',p.s],['c','kontroll',p.c]];
+    const row=groups.map(([k,lab,val])=>`<div class="grp g-${k}"><div class="digits">${val}</div><div class="lab">${lab}</div></div>`).join('');
+    const sugu=it.isMale?'mees':'naine';
+    document.getElementById('anatomy').innerHTML=
+      `<div class="cap">Koodi ülesehitus</div><div class="code-row">${row}</div>`+
+      `<div class="meta"><b>${it.name}</b> · ${sugu} · sündinud <b>${it.day}. ${MONTHS[it.month-1]} ${it.year}</b></div>`;
+  }
+
+  function copyText(txt,btn,ok){
+    navigator.clipboard.writeText(txt).then(()=>{
+      const old=btn.textContent; btn.textContent=ok; btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent=old;btn.classList.remove('ok');},1100);
+    });
+  }
+
+  function render(items){
+    document.getElementById('output').hidden=false;
+    renderAnatomy(items[0]);
+    document.getElementById('listCap').textContent=items.length+(items.length===1?' kirje':' kirjet');
+    const ul=document.getElementById('list'); ul.innerHTML='';
+    items.forEach(it=>{
+      const li=document.createElement('li');
+      li.innerHTML=`<div class="entry"><span class="val">${it.code}</span><span class="who">${it.name}</span></div>`;
+      const b=document.createElement('button');
+      b.className='copy'; b.textContent='kopeeri';
+      b.onclick=()=>copyText(it.code,b,'✓');
+      li.appendChild(b); ul.appendChild(li);
+    });
+    document.getElementById('copyAll').onclick=e=>
+      copyText(items.map(i=>i.code+'\t'+i.name).join('\n'),e.target,'✓ kopeeritud');
+  }
+
+  function run(){
+    let yFrom=+document.getElementById('yFrom').value;
+    let yTo=+document.getElementById('yTo').value;
+    let count=Math.max(1,Math.min(100,+document.getElementById('count').value||1));
+    yFrom=Math.max(1800,Math.min(2199,yFrom));
+    yTo=Math.max(1800,Math.min(2199,yTo));
+    if(yFrom>yTo)[yFrom,yTo]=[yTo,yFrom];
+    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref)));
+  }
+  document.getElementById('gen').addEventListener('click',run);
+
+  // valideerija UI
+  const vres=document.getElementById('vresult');
+  function doValidate(){
+    const code=document.getElementById('vinput').value.trim();
+    if(!code){vres.className='vresult';return;}
+    const r=validateIsikukood(code);
+    if(r.valid){
+      vres.className='vresult show good';
+      vres.innerHTML=`<span class="badge">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`;
+    }else{
+      vres.className='vresult show bad';
+      vres.innerHTML=`<span class="badge">vigane</span>${r.error}`;
+    }
+  }
+  document.getElementById('vbtn').addEventListener('click',doValidate);
+  document.getElementById('vinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidate();});
+
+  run(); // esmane näidis
+</script>
+</body>
+</html>
