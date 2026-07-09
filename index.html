@@ -108,6 +108,7 @@
   .copy{font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;transition:.12s;}
   .copy:hover{border-color:var(--accent);color:var(--accent-ink);}
   .copy.ok{border-color:var(--ok);color:var(--ok);}
+  .actions{display:flex;gap:6px;flex-shrink:0;}
 
   .validator{margin-top:20px;padding:18px;}
   .validator > label{display:block;margin-bottom:9px;}
@@ -289,10 +290,13 @@
     items.forEach(it=>{
       const li=document.createElement('li');
       li.innerHTML=`<div class="entry"><span class="val">${it.code}</span><span class="who">${it.name}</span></div>`;
-      const b=document.createElement('button');
-      b.className='copy'; b.textContent='kopeeri';
-      b.onclick=()=>copyText(it.code,b,'✓');
-      li.appendChild(b); ul.appendChild(li);
+      const actions=document.createElement('div'); actions.className='actions';
+      const bc=document.createElement('button'); bc.className='copy'; bc.textContent='kood';
+      bc.onclick=()=>copyText(it.code,bc,'✓');
+      const bn=document.createElement('button'); bn.className='copy'; bn.textContent='nimi';
+      bn.onclick=()=>copyText(it.name,bn,'✓');
+      actions.appendChild(bc); actions.appendChild(bn);
+      li.appendChild(actions); ul.appendChild(li);
     });
     document.getElementById('copyAll').onclick=e=>
       copyText(items.map(i=>i.code+'\t'+i.name).join('\n'),e.target,'✓ kopeeritud');
