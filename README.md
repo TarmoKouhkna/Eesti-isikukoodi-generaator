@@ -9,7 +9,8 @@ Veebipõhine tööriist Eesti isikukoodide ja fiktiivsete testidentiteetide loom
 - **Isikukoodid** kehtiva kontrollnumbriga; soo valik ja sünniaasta vahemik (1800–2199)
 - **Koodi ülesehituse selgitus** (`G YY MM DD SSS C`)
 - **Fiktiivsed eesti nimed** vastavalt soole
-- **Test-IBAN** iga isiku juurde (kehtiv mod-97 kontrollnumber, tegelikud pangaprefiksid)
+- **Lisaväljad** (valitavad): vanus, nimest tuletatud e-post, aadress (tänav, sihtnumber, linn) ja test-IBAN
+- **Test-IBAN** kehtiva mod-97 kontrollnumbriga, tegelike pangaprefiksitega
 - **Deterministlik seeme** — sama seeme annab alati sama komplekti (korratavad testid)
 - **Eksport** — CSV ja JSON allalaadimine, `INSERT`-lause kopeerimine
 - **Isikukoodi valideerija** — kontrolli üht koodi või kleebi terve loend korraga (pass/fail + põhjus)

@@ -43,7 +43,8 @@
   input[type=number],input[type=text]{width:100%;font-family:var(--mono);font-size:15px;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px;background:var(--surface);-moz-appearance:textfield;}
   input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
   .dash{color:var(--muted);}
-  .check{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink);cursor:pointer;align-self:flex-end;padding-bottom:9px;}
+  .checks{display:flex;flex-wrap:wrap;gap:12px 20px;}
+  .check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;}
   .check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
 
   .generate{grid-column:1 / -1;background:var(--accent);color:#fff;border:0;border-radius:9px;font-family:var(--sans);font-size:15px;font-weight:600;padding:12px;cursor:pointer;transition:background .12s,transform .06s;}
@@ -74,13 +75,14 @@
   .exp button.ok{border-color:var(--ok);color:var(--ok);}
 
   ul{list-style:none;margin:0;padding:0 6px 8px;}
-  li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-top:1px solid var(--line);animation:fade .28s ease both;}
+  li{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px;border-top:1px solid var(--line);animation:fade .28s ease both;}
   li:first-child{border-top:0;}
-  .entry{display:flex;flex-direction:column;gap:2px;min-width:0;}
+  .entry{display:flex;flex-direction:column;gap:3px;min-width:0;}
   .val{font-family:var(--mono);font-size:16px;letter-spacing:0.03em;}
-  .who{font-size:12px;color:var(--muted);}
+  .who{font-size:12.5px;color:var(--ink);}
+  .line{font-size:12px;color:var(--muted);}
   .iban{font-family:var(--mono);font-size:12px;color:var(--muted);}
-  .actions{display:flex;gap:6px;flex-shrink:0;}
+  .actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:44%;}
   .copy{font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;transition:.12s;}
   .copy:hover{border-color:var(--accent);color:var(--accent-ink);}
   .copy.ok{border-color:var(--ok);color:var(--ok);}
@@ -113,7 +115,7 @@
 
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
   @media (prefers-reduced-motion:reduce){li,.vresult.show{animation:none;}.generate:active{transform:none;}}
-  @media (max-width:520px){.controls{grid-template-columns:1fr;}.check{align-self:flex-start;padding-bottom:0;}}
+  @media (max-width:520px){.controls{grid-template-columns:1fr;}.actions{max-width:none;}}
 </style>
 </head>
 <body>
@@ -147,11 +149,19 @@
       <label>Kogus</label>
       <input type="number" id="count" value="5" min="1" max="500">
     </div>
-    <div class="field">
+    <div class="field full">
       <label>Seeme (valikuline)</label>
       <input type="text" id="seed" placeholder="tühi = juhuslik" autocomplete="off">
     </div>
-    <label class="check"><input type="checkbox" id="ibanToggle" checked> Lisa test-IBAN</label>
+    <div class="field full">
+      <label>Lisaväljad</label>
+      <div class="checks">
+        <label class="check"><input type="checkbox" id="fAge" checked> Vanus</label>
+        <label class="check"><input type="checkbox" id="fMail" checked> E-post</label>
+        <label class="check"><input type="checkbox" id="fAddr" checked> Aadress</label>
+        <label class="check"><input type="checkbox" id="fIban" checked> IBAN</label>
+      </div>
+    </div>
     <button class="generate" id="gen">Genereeri</button>
   </div>
 
@@ -170,7 +180,7 @@
   </div>
 
   <div class="card">
-    <div class="ctitle">Valideerija</div>
+    <div class="ctitle">Isikukoodi valideerija</div>
     <div class="valwrap">
       <label for="vinput" style="display:block;margin-bottom:8px;">Kontrolli üht koodi või kleebi terve loend</label>
       <textarea id="vinput" placeholder="39912315231&#10;60001010000&#10;..."></textarea>
@@ -191,7 +201,7 @@
 
   <p class="foot">
     Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — sajand ja sugu, sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
-    IBAN-id kannavad kehtivat mod-97 kontrollnumbrit. Kõik andmed on juhuslikult loodud ega vasta ühelegi tegelikule isikule ega kontole.
+    IBAN-id kannavad kehtivat mod-97 kontrollnumbrit. Kõik andmed on juhuslikult loodud ega vasta ühelegi tegelikule isikule, kontole ega aadressile.
   </p>
 </div>
 
@@ -228,45 +238,41 @@
     let rem=0;for(const d of numeric)rem=(rem*10+Number(d))%97;
     return "EE"+pad(98-rem,2)+bban;
   }
-
-  // Eesti pangakoodid (IBAN-i 5.-6. number) ja üldine mod-97 kontroll
-  const EE_BANKS={
-    '10':{name:'SEB Pank',bic:'EEUHEE2X'},
-    '17':{name:'Luminor Bank',bic:'RIKOEE22'},
-    '22':{name:'Swedbank',bic:'HABAEE2X'},
-    '42':{name:'Coop Pank',bic:'EKRDEE22'},
-    '77':{name:'LHV Pank',bic:'LHVBEE22'},
-    '96':{name:'Luminor Bank (end. Nordea)',bic:'RIKOEE22'}
-  };
+  const EE_BANKS={'10':{name:'SEB Pank',bic:'EEUHEE2X'},'17':{name:'Luminor Bank',bic:'RIKOEE22'},'22':{name:'Swedbank',bic:'HABAEE2X'},'42':{name:'Coop Pank',bic:'EKRDEE22'},'77':{name:'LHV Pank',bic:'LHVBEE22'},'96':{name:'Luminor Bank (end. Nordea)',bic:'RIKOEE22'}};
   const IBAN_LEN={AD:24,AT:20,BE:16,BG:22,CH:21,CY:28,CZ:24,DE:22,DK:18,EE:20,ES:24,FI:18,FR:27,GB:22,GR:27,HR:21,HU:28,IE:22,IS:26,IT:27,LI:21,LT:20,LU:20,LV:21,MC:27,MT:31,NL:18,NO:15,PL:28,PT:25,RO:24,SE:24,SI:19,SK:24};
   const COUNTRY={EE:'Eesti',FI:'Soome',LV:'Läti',LT:'Leedu',SE:'Rootsi',NO:'Norra',DK:'Taani',DE:'Saksamaa',GB:'Ühendkuningriik',NL:'Holland',FR:'Prantsusmaa',ES:'Hispaania',IT:'Itaalia',PL:'Poola',BE:'Belgia',AT:'Austria',IE:'Iirimaa',PT:'Portugal',CH:'Šveits'};
   function ibanMod97(s){let rem=0;for(const ch of s){const c=ch.charCodeAt(0);const v=c>=65?c-55:c-48;rem=(v>9)?(rem*100+v)%97:(rem*10+v)%97;}return rem;}
   function validateIBAN(input){
     const iban=String(input).replace(/\s+/g,'').toUpperCase();
-    if(!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(iban)) return {valid:false,error:'Vigane IBAN-i formaat'};
-    const country=iban.slice(0,2), expLen=IBAN_LEN[country];
-    if(expLen && iban.length!==expLen) return {valid:false,error:country+' IBAN peab olema '+expLen+' märki (sisestatud '+iban.length+')'};
-    if(ibanMod97(iban.slice(4)+iban.slice(0,4))!==1) return {valid:false,error:'Vale kontrollnumber (mod-97)'};
+    if(!/^[A-Z]{2}\d{2}[A-Z0-9]+$/.test(iban))return{valid:false,error:'Vigane IBAN-i formaat'};
+    const country=iban.slice(0,2),expLen=IBAN_LEN[country];
+    if(expLen&&iban.length!==expLen)return{valid:false,error:country+' IBAN peab olema '+expLen+' märki (sisestatud '+iban.length+')'};
+    if(ibanMod97(iban.slice(4)+iban.slice(0,4))!==1)return{valid:false,error:'Vale kontrollnumber (mod-97)'};
     const info={valid:true,iban,formatted:iban.replace(/(.{4})/g,'$1 ').trim(),country,countryName:COUNTRY[country]||country,checkDigits:iban.slice(2,4),bban:iban.slice(4)};
-    if(country==='EE'){
-      const bc=iban.slice(4,6), b=EE_BANKS[bc];
-      info.bankCode=bc; info.bankName=b?b.name:'tundmatu pank'; if(b)info.bic=b.bic;
-      info.accountNumber=iban.slice(6);
-    }
+    if(country==='EE'){const bc=iban.slice(4,6),b=EE_BANKS[bc];info.bankCode=bc;info.bankName=b?b.name:'tundmatu pank';if(b)info.bic=b.bic;info.accountNumber=iban.slice(6);}
     return info;
   }
 
-  // ---------- nimed ----------
+  // ---------- nimed, aadressid ----------
   const NAMES={
     m:["Andres","Toomas","Mart","Priit","Rein","Kristjan","Marek","Indrek","Margus","Aivar","Raivo","Peeter","Kalev","Urmas","Jüri","Madis","Siim","Karl","Rasmus","Markus","Sander","Martin","Henri","Kaarel"],
     f:["Kadri","Mari","Tiiu","Anne","Liis","Katrin","Maarja","Kristiina","Piret","Riina","Kersti","Tuuli","Eve","Helen","Laura","Kätlin","Triin","Sofia","Eliise","Kaisa","Karin","Merike","Reet","Tiina"],
     last:["Tamm","Saar","Sepp","Mägi","Kask","Kukk","Rebane","Ilves","Pärn","Koppel","Lepik","Raudsepp","Karu","Vaher","Uibo","Kangur","Lill","Kuusk","Palm","Oja","Nurm","Lind","Mets","Kivi","Põld","Teder","Randmaa","Kütt","Org","Susi"]
   };
+  const CITIES=[{n:'Tallinn',p:'10'},{n:'Tartu',p:'50'},{n:'Pärnu',p:'80'},{n:'Narva',p:'20'},{n:'Viljandi',p:'71'},{n:'Rakvere',p:'44'},{n:'Kuressaare',p:'93'},{n:'Haapsalu',p:'90'},{n:'Võru',p:'65'},{n:'Valga',p:'68'},{n:'Jõhvi',p:'41'},{n:'Paide',p:'72'},{n:'Rapla',p:'79'},{n:'Maardu',p:'74'},{n:'Keila',p:'76'}];
+  const STREETS=["Tamme","Kase","Pärna","Kesk","Jaama","Kooli","Aia","Turu","Vabaduse","Lille","Männi","Kuuse","Rebase","Metsa","Oja","Ranna","Posti","Kalda","Sõpruse","Nurme","Tulika","Sepa","Ravila","Pargi","Uus","Pikk","Lai","Tammsaare","Sadama","Rohu"];
+  function translit(s){const m={'õ':'o','ä':'a','ö':'o','ü':'u','š':'s','ž':'z'};return s.toLowerCase().replace(/[õäöüšž]/g,c=>m[c]);}
+  function generateAddress(){
+    const c=pick(CITIES),zip=c.p+pad(rnd(1000),3),street=pick(STREETS),house=1+rnd(120);
+    const tanav=street+' '+house+(RNG()<0.5?('-'+(1+rnd(40))):'');
+    return {tanav,sihtnumber:zip,linn:c.n};
+  }
+  function ageFrom(y,m,d){const t=new Date();let a=t.getFullYear()-y;const mo=t.getMonth()+1,day=t.getDate();if(mo<m||(mo===m&&day<d))a--;return a;}
 
   // ---------- koodi genereerimine ----------
   function daysInMonth(y,m){return new Date(y,m,0).getDate();}
   function centuryDigit(year,isMale){return {18:1,19:3,20:5,21:7}[Math.floor(year/100)]+(isMale?0:1);}
-  function generateOne(yFrom,yTo,pref,withIban){
+  function generateOne(yFrom,yTo,pref,opts){
     const year=yFrom+rnd(yTo-yFrom+1),month=1+rnd(12),day=1+rnd(daysInMonth(year,month));
     const isMale=pref==='m'?true:pref==='f'?false:RNG()<0.5,serial=rnd(1000);
     const g=centuryDigit(year,isMale);
@@ -275,7 +281,10 @@
     parts.c=String(isikukoodCheckDigit(first10));
     const eesnimi=pick(isMale?NAMES.m:NAMES.f),perekonnanimi=pick(NAMES.last);
     const item={code:parts.g+parts.y+parts.m+parts.d+parts.s+parts.c,parts,year,month,day,isMale,eesnimi,perekonnanimi,name:eesnimi+' '+perekonnanimi};
-    if(withIban) item.iban=generateIBAN();
+    if(opts.age) item.vanus=ageFrom(year,month,day);
+    if(opts.mail) item.epost=translit(eesnimi)+'.'+translit(perekonnanimi)+'@example.com';
+    if(opts.addr){const a=generateAddress();item.tanav=a.tanav;item.sihtnumber=a.sihtnumber;item.linn=a.linn;}
+    if(opts.iban) item.iban=generateIBAN();
     return item;
   }
 
@@ -284,10 +293,14 @@
   function toRows(items){
     return items.map(it=>{
       const r={isikukood:it.code,eesnimi:it.eesnimi,perekonnanimi:it.perekonnanimi,sugu:it.isMale?'M':'N',synniaeg:it.year+'-'+pad(it.month,2)+'-'+pad(it.day,2)};
-      if(it.iban) r.iban=it.iban;
+      if(it.vanus!=null)r.vanus=it.vanus;
+      if(it.epost)r.epost=it.epost;
+      if(it.tanav){r.aadress=it.tanav;r.sihtnumber=it.sihtnumber;r.linn=it.linn;}
+      if(it.iban)r.iban=it.iban;
       return r;
     });
   }
+  function toTSV(rs){const cols=Object.keys(rs[0]);return [cols.join('\t'),...rs.map(r=>cols.map(c=>r[c]).join('\t'))].join('\n');}
   function toCSV(rs){const cols=Object.keys(rs[0]);const esc=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;return [cols.join(','),...rs.map(r=>cols.map(c=>esc(r[c])).join(','))].join('\n');}
   function toSQL(rs){const cols=Object.keys(rs[0]);const q=v=>"'"+String(v).replace(/'/g,"''")+"'";const vals=rs.map(r=>'  ('+cols.map(c=>q(r[c])).join(', ')+')').join(',\n');return 'INSERT INTO isikud ('+cols.join(', ')+') VALUES\n'+vals+';';}
   function download(name,text,mime){const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
@@ -298,7 +311,6 @@
   const genderEl=document.getElementById('gender');
   genderEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;genderPref=b.dataset.g;[...genderEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));});
   const MONTHS=['jaan','veebr','märts','apr','mai','juuni','juuli','aug','sept','okt','nov','dets'];
-
   function copyText(txt,btn,ok){navigator.clipboard.writeText(txt).then(()=>flash(btn,ok));}
 
   function renderAnatomy(it){
@@ -307,7 +319,8 @@
     const row=groups.map(([k,lab,val])=>`<div class="grp g-${k}"><div class="digits">${val}</div><div class="lab">${lab}</div></div>`).join('');
     const sugu=it.isMale?'mees':'naine';
     let meta=`<b>${it.name}</b> · ${sugu} · sündinud <b>${it.day}. ${MONTHS[it.month-1]} ${it.year}</b>`;
-    if(it.iban) meta+=` · <span class="ib">${it.iban}</span>`;
+    if(it.vanus!=null)meta+=` (${it.vanus} a.)`;
+    if(it.iban)meta+=` · <span class="ib">${it.iban}</span>`;
     document.getElementById('anatomy').innerHTML=`<div class="cap">Koodi ülesehitus</div><div class="code-row">${row}</div><div class="meta">${meta}</div>`;
   }
 
@@ -319,14 +332,17 @@
     const ul=document.getElementById('list');ul.innerHTML='';
     items.forEach(it=>{
       const li=document.createElement('li');
-      let entry=`<span class="val">${it.code}</span><span class="who">${it.name}</span>`;
-      if(it.iban) entry+=`<span class="iban">${it.iban}</span>`;
+      let entry=`<span class="val">${it.code}</span><span class="who">${it.name}${it.vanus!=null?' · '+it.vanus+' a.':''}</span>`;
+      if(it.epost)entry+=`<span class="line">${it.epost}</span>`;
+      if(it.tanav)entry+=`<span class="line">${it.tanav}, ${it.sihtnumber} ${it.linn}</span>`;
+      if(it.iban)entry+=`<span class="iban">${it.iban}</span>`;
       li.innerHTML=`<div class="entry">${entry}</div>`;
       const actions=document.createElement('div');actions.className='actions';
-      const bc=document.createElement('button');bc.className='copy';bc.textContent='kood';bc.onclick=()=>copyText(it.code,bc,'✓');
-      const bn=document.createElement('button');bn.className='copy';bn.textContent='nimi';bn.onclick=()=>copyText(it.name,bn,'✓');
-      actions.appendChild(bc);actions.appendChild(bn);
-      if(it.iban){const bi=document.createElement('button');bi.className='copy';bi.textContent='iban';bi.onclick=()=>copyText(it.iban,bi,'✓');actions.appendChild(bi);}
+      const mk=(label,val)=>{const b=document.createElement('button');b.className='copy';b.textContent=label;b.onclick=()=>copyText(val,b,'✓');return b;};
+      actions.appendChild(mk('kood',it.code));
+      actions.appendChild(mk('nimi',it.name));
+      if(it.epost)actions.appendChild(mk('e-post',it.epost));
+      if(it.iban)actions.appendChild(mk('iban',it.iban));
       li.appendChild(actions);ul.appendChild(li);
     });
   }
@@ -338,18 +354,17 @@
     if(yFrom>yTo)[yFrom,yTo]=[yTo,yFrom];
     const seed=document.getElementById('seed').value.trim();
     RNG=seed?mulberry32(xmur3(seed)()):Math.random;
-    const withIban=document.getElementById('ibanToggle').checked;
-    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,withIban)));
+    const opts={age:document.getElementById('fAge').checked,mail:document.getElementById('fMail').checked,addr:document.getElementById('fAddr').checked,iban:document.getElementById('fIban').checked};
+    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,opts)));
   }
   document.getElementById('gen').addEventListener('click',run);
 
-  // ekspordi nupud
-  document.getElementById('copyAll').onclick=e=>copyText(current.map(i=>[i.code,i.name,i.iban].filter(Boolean).join('\t')).join('\n'),e.target,'✓');
+  document.getElementById('copyAll').onclick=e=>copyText(toTSV(toRows(current)),e.target,'✓');
   document.getElementById('expCsv').onclick=()=>download('testandmed.csv',toCSV(toRows(current)),'text/csv');
   document.getElementById('expJson').onclick=()=>download('testandmed.json',JSON.stringify(toRows(current),null,2),'application/json');
   document.getElementById('expSql').onclick=e=>copyText(toSQL(toRows(current)),e.target,'✓ SQL');
 
-  // ---------- UI: valideerija (üks või loend) ----------
+  // ---------- UI: isikukoodi valideerija ----------
   const vres=document.getElementById('vresult');
   function doValidate(){
     const tokens=document.getElementById('vinput').value.split(/[\s,;]+/).filter(Boolean);
@@ -357,16 +372,11 @@
     if(tokens.length===1){
       const r=validateIsikukood(tokens[0]);
       vres.className='vresult show single';
-      vres.innerHTML=r.valid
-        ?`<span class="badge b-ok">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`
-        :`<span class="badge b-bad">vigane</span>${r.error}`;
+      vres.innerHTML=r.valid?`<span class="badge b-ok">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`:`<span class="badge b-bad">vigane</span>${r.error}`;
       return;
     }
     let ok=0;
-    const rows=tokens.map(t=>{
-      const r=validateIsikukood(t);if(r.valid)ok++;
-      return `<div class="vitem"><span class="badge ${r.valid?'b-ok':'b-bad'}">${r.valid?'✓':'✕'}</span><span class="c">${t}</span><span class="why">${r.valid?r.birthDate+' · '+r.gender:r.error}</span></div>`;
-    }).join('');
+    const rows=tokens.map(t=>{const r=validateIsikukood(t);if(r.valid)ok++;return `<div class="vitem"><span class="badge ${r.valid?'b-ok':'b-bad'}">${r.valid?'✓':'✕'}</span><span class="c">${t}</span><span class="why">${r.valid?r.birthDate+' · '+r.gender:r.error}</span></div>`;}).join('');
     vres.className='vresult show';
     vres.innerHTML=`<div class="vsum"><b>${ok}</b>/${tokens.length} kehtivat</div><div class="vlist">${rows}</div>`;
   }
@@ -386,8 +396,7 @@
     if(r.accountNumber)kv.push(['Kontonumber',r.accountNumber]);
     kv.push(['Kontrollnumbrid',r.checkDigits]);
     ibres.className='vresult show';
-    ibres.innerHTML=`<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>${r.formatted}</b></div>`+
-      '<dl class="kv">'+kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')+'</dl>';
+    ibres.innerHTML=`<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>${r.formatted}</b></div>`+'<dl class="kv">'+kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')+'</dl>';
   }
   document.getElementById('ibbtn').addEventListener('click',doValidateIBAN);
   document.getElementById('ibinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidateIBAN();});
