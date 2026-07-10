@@ -6,7 +6,7 @@
 <title>Isikukoodi generaator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --paper:#EEF1F5;--surface:#FFFFFF;--ink:#14161A;--muted:#5E6672;--line:#DCE1E8;
@@ -46,26 +46,40 @@
   .checks{display:flex;flex-wrap:wrap;gap:12px 20px;}
   .check{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);cursor:pointer;}
   .check input{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;}
+  .hint{font-size:12px;color:var(--muted);grid-column:1 / -1;margin-top:-4px;}
 
   .generate{grid-column:1 / -1;background:var(--accent);color:#fff;border:0;border-radius:9px;font-family:var(--sans);font-size:15px;font-weight:600;padding:12px;cursor:pointer;transition:background .12s,transform .06s;}
   .generate:hover{background:var(--accent-ink);}
   .generate:active{transform:translateY(1px);}
 
-  .anatomy{padding:22px 18px;text-align:center;border-bottom:1px solid var(--line);}
+  /* ID-kaart */
+  #hero{padding:22px 18px 4px;display:flex;justify-content:center;}
+  .idcard{position:relative;width:100%;max-width:420px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#eaf1f8,#dbe6f2);border:1px solid #c5d4e6;box-shadow:0 6px 20px rgba(20,50,90,.10);}
+  .idcard .top{display:flex;align-items:baseline;justify-content:space-between;padding:9px 14px;background:linear-gradient(90deg,var(--accent),#0a86d6);color:#fff;}
+  .idcard .top .c1{font-size:12px;font-weight:600;letter-spacing:0.08em;}
+  .idcard .top .c2{font-size:9px;letter-spacing:0.12em;opacity:.9;text-transform:uppercase;}
+  .idcard .body{display:flex;gap:14px;padding:14px;}
+  .idcard .photo{width:78px;height:98px;border-radius:6px;background:#fff;border:1px solid #c5d4e6;overflow:hidden;flex-shrink:0;display:flex;align-items:flex-end;justify-content:center;}
+  .idcard .fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:7px;}
+  .idcard .f .k{display:block;font-size:8px;letter-spacing:0.05em;color:#5a7599;text-transform:uppercase;}
+  .idcard .f .v{display:block;font-size:13px;color:#12283f;font-family:var(--mono);}
+  .idcard .f .v.nm{font-family:var(--sans);font-weight:600;letter-spacing:0.01em;}
+  .idcard .grid2{display:flex;gap:14px;}
+  .idcard .grid2 .f{flex:1;}
+  .idcard .mark{position:absolute;top:52%;left:50%;transform:translate(-50%,-50%) rotate(-22deg);font-size:38px;font-weight:800;letter-spacing:0.14em;color:rgba(11,95,176,.09);pointer-events:none;white-space:nowrap;}
+
+  .anatomy{padding:14px 18px 22px;text-align:center;border-bottom:1px solid var(--line);}
   .anatomy .cap{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:14px;}
   .code-row{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;}
   .grp{display:flex;flex-direction:column;align-items:center;gap:8px;}
-  .grp .digits{font-family:var(--mono);font-size:clamp(24px,7vw,38px);font-weight:500;letter-spacing:0.02em;padding-bottom:6px;border-bottom:3px solid;line-height:1;}
-  .grp .lab{font-size:10.5px;letter-spacing:0.02em;color:var(--muted);max-width:9ch;}
+  .grp .digits{font-family:var(--mono);font-size:clamp(22px,6.5vw,34px);font-weight:500;letter-spacing:0.02em;padding-bottom:6px;border-bottom:3px solid;line-height:1;}
+  .grp .lab{font-size:10px;letter-spacing:0.02em;color:var(--muted);max-width:9ch;}
   .g-g .digits{color:var(--seg-g);border-color:var(--seg-g);}
   .g-y .digits{color:var(--seg-y);border-color:var(--seg-y);}
   .g-m .digits{color:var(--seg-m);border-color:var(--seg-m);}
   .g-d .digits{color:var(--seg-d);border-color:var(--seg-d);}
   .g-s .digits{color:var(--seg-s);border-color:var(--seg-s);}
   .g-c .digits{color:var(--seg-c);border-color:var(--seg-c);}
-  .meta{margin-top:16px;font-size:13px;color:var(--muted);}
-  .meta b{color:var(--ink);font-weight:500;}
-  .meta .ib{font-family:var(--mono);}
 
   .toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;flex-wrap:wrap;}
   .toolbar .cnt{font-size:12px;color:var(--muted);}
@@ -82,7 +96,7 @@
   .who{font-size:12.5px;color:var(--ink);}
   .line{font-size:12px;color:var(--muted);}
   .iban{font-family:var(--mono);font-size:12px;color:var(--muted);}
-  .actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;max-width:44%;}
+  .actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;align-items:center;max-width:46%;}
   .copy{font-family:var(--mono);font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer;transition:.12s;}
   .copy:hover{border-color:var(--accent);color:var(--accent-ink);}
   .copy.ok{border-color:var(--ok);color:var(--ok);}
@@ -94,7 +108,7 @@
   .vbtn:hover{background:#000;}
   .vresult{margin-top:14px;font-size:13.5px;display:none;}
   .vresult.show{display:block;animation:fade .2s ease both;}
-  .badge{font-family:var(--mono);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;padding:3px 7px;border-radius:5px;}
+  .badge{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.04em;padding:3px 7px;border-radius:5px;white-space:nowrap;}
   .b-ok{background:rgba(30,138,130,.12);color:var(--ok);}
   .b-bad{background:rgba(178,58,72,.12);color:var(--err);}
   .single b{color:var(--ink);font-weight:500;}
@@ -123,12 +137,22 @@
   <header>
     <div>
       <h1>Isikukoodi generaator</h1>
-      <div class="sub">Kehtivad testkoodid, fiktiivsed identiteedid ja eksport</div>
+      <div class="sub">Kehtivad koodid, vigased juhud, piiripealsed näited ja eksport</div>
     </div>
     <div class="tag">ainult testimiseks</div>
   </header>
 
   <div class="card controls">
+    <div class="field full">
+      <label>Režiim</label>
+      <div class="seg" id="mode">
+        <button data-m="valid" aria-pressed="true">Kehtivad</button>
+        <button data-m="invalid" aria-pressed="false">Vigased</button>
+        <button data-m="edge" aria-pressed="false">Piiripealsed</button>
+      </div>
+    </div>
+    <div class="hint" id="modeHint"></div>
+
     <div class="field full">
       <label>Sugu</label>
       <div class="seg" id="gender">
@@ -153,7 +177,7 @@
       <label>Seeme (valikuline)</label>
       <input type="text" id="seed" placeholder="tühi = juhuslik" autocomplete="off">
     </div>
-    <div class="field full">
+    <div class="field full" id="fieldsRow">
       <label>Lisaväljad</label>
       <div class="checks">
         <label class="check"><input type="checkbox" id="fAge" checked> Vanus</label>
@@ -166,6 +190,7 @@
   </div>
 
   <div class="card" id="output" hidden>
+    <div id="hero"></div>
     <div class="anatomy" id="anatomy"></div>
     <div class="toolbar">
       <span class="cnt" id="listCap"></span>
@@ -201,7 +226,7 @@
 
   <p class="foot">
     Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — sajand ja sugu, sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
-    IBAN-id kannavad kehtivat mod-97 kontrollnumbrit. Kõik andmed on juhuslikult loodud ega vasta ühelegi tegelikule isikule, kontole ega aadressile.
+    ID-kaart on stiliseeritud näidis (NÄIDIS-vesimärgiga). Kõik andmed on juhuslikult loodud ega vasta ühelegi tegelikule isikule, kontole ega dokumendile.
   </p>
 </div>
 
@@ -230,14 +255,9 @@
   }
 
   // ---------- IBAN ----------
-  const BANKS=["10","17","22","42","77"]; // SEB, Luminor, Swedbank, Coop, LHV
+  const BANKS=["10","17","22","42","77"];
   function ibanDomesticCheck(body15){const w=[7,3,1];let s=0;for(let i=0;i<body15.length;i++)s+=Number(body15[i])*w[i%3];return (10-(s%10))%10;}
-  function generateIBAN(){
-    const bank=pick(BANKS);let acc="";for(let i=0;i<13;i++)acc+=rnd(10);
-    const body=bank+acc,bban=body+ibanDomesticCheck(body),numeric=bban+"141400";
-    let rem=0;for(const d of numeric)rem=(rem*10+Number(d))%97;
-    return "EE"+pad(98-rem,2)+bban;
-  }
+  function generateIBAN(){const bank=pick(BANKS);let acc="";for(let i=0;i<13;i++)acc+=rnd(10);const body=bank+acc,bban=body+ibanDomesticCheck(body),numeric=bban+"141400";let rem=0;for(const d of numeric)rem=(rem*10+Number(d))%97;return "EE"+pad(98-rem,2)+bban;}
   const EE_BANKS={'10':{name:'SEB Pank',bic:'EEUHEE2X'},'17':{name:'Luminor Bank',bic:'RIKOEE22'},'22':{name:'Swedbank',bic:'HABAEE2X'},'42':{name:'Coop Pank',bic:'EKRDEE22'},'77':{name:'LHV Pank',bic:'LHVBEE22'},'96':{name:'Luminor Bank (end. Nordea)',bic:'RIKOEE22'}};
   const IBAN_LEN={AD:24,AT:20,BE:16,BG:22,CH:21,CY:28,CZ:24,DE:22,DK:18,EE:20,ES:24,FI:18,FR:27,GB:22,GR:27,HR:21,HU:28,IE:22,IS:26,IT:27,LI:21,LT:20,LU:20,LV:21,MC:27,MT:31,NL:18,NO:15,PL:28,PT:25,RO:24,SE:24,SI:19,SK:24};
   const COUNTRY={EE:'Eesti',FI:'Soome',LV:'Läti',LT:'Leedu',SE:'Rootsi',NO:'Norra',DK:'Taani',DE:'Saksamaa',GB:'Ühendkuningriik',NL:'Holland',FR:'Prantsusmaa',ES:'Hispaania',IT:'Itaalia',PL:'Poola',BE:'Belgia',AT:'Austria',IE:'Iirimaa',PT:'Portugal',CH:'Šveits'};
@@ -262,35 +282,59 @@
   const CITIES=[{n:'Tallinn',p:'10'},{n:'Tartu',p:'50'},{n:'Pärnu',p:'80'},{n:'Narva',p:'20'},{n:'Viljandi',p:'71'},{n:'Rakvere',p:'44'},{n:'Kuressaare',p:'93'},{n:'Haapsalu',p:'90'},{n:'Võru',p:'65'},{n:'Valga',p:'68'},{n:'Jõhvi',p:'41'},{n:'Paide',p:'72'},{n:'Rapla',p:'79'},{n:'Maardu',p:'74'},{n:'Keila',p:'76'}];
   const STREETS=["Tamme","Kase","Pärna","Kesk","Jaama","Kooli","Aia","Turu","Vabaduse","Lille","Männi","Kuuse","Rebase","Metsa","Oja","Ranna","Posti","Kalda","Sõpruse","Nurme","Tulika","Sepa","Ravila","Pargi","Uus","Pikk","Lai","Tammsaare","Sadama","Rohu"];
   function translit(s){const m={'õ':'o','ä':'a','ö':'o','ü':'u','š':'s','ž':'z'};return s.toLowerCase().replace(/[õäöüšž]/g,c=>m[c]);}
-  function generateAddress(){
-    const c=pick(CITIES),zip=c.p+pad(rnd(1000),3),street=pick(STREETS),house=1+rnd(120);
-    const tanav=street+' '+house+(RNG()<0.5?('-'+(1+rnd(40))):'');
-    return {tanav,sihtnumber:zip,linn:c.n};
-  }
+  function generateAddress(){const c=pick(CITIES),zip=c.p+pad(rnd(1000),3),street=pick(STREETS),house=1+rnd(120);const tanav=street+' '+house+(RNG()<0.5?('-'+(1+rnd(40))):'');return {tanav,sihtnumber:zip,linn:c.n};}
   function ageFrom(y,m,d){const t=new Date();let a=t.getFullYear()-y;const mo=t.getMonth()+1,day=t.getDate();if(mo<m||(mo===m&&day<d))a--;return a;}
 
-  // ---------- koodi genereerimine ----------
+  // ---------- koodi ehitamine ----------
   function daysInMonth(y,m){return new Date(y,m,0).getDate();}
   function centuryDigit(year,isMale){return {18:1,19:3,20:5,21:7}[Math.floor(year/100)]+(isMale?0:1);}
+  function makeCode(year,month,day,serial,isMale){const g=centuryDigit(year,isMale);const p={g:String(g),y:pad(year%100,2),m:pad(month,2),d:pad(day,2),s:pad(serial,3)};const c=isikukoodCheckDigit((p.g+p.y+p.m+p.d+p.s).split('').map(Number));return p.g+p.y+p.m+p.d+p.s+c;}
   function generateOne(yFrom,yTo,pref,opts){
     const year=yFrom+rnd(yTo-yFrom+1),month=1+rnd(12),day=1+rnd(daysInMonth(year,month));
     const isMale=pref==='m'?true:pref==='f'?false:RNG()<0.5,serial=rnd(1000);
     const g=centuryDigit(year,isMale);
     const parts={g:String(g),y:pad(year%100,2),m:pad(month,2),d:pad(day,2),s:pad(serial,3)};
-    const first10=(parts.g+parts.y+parts.m+parts.d+parts.s).split('').map(Number);
-    parts.c=String(isikukoodCheckDigit(first10));
+    parts.c=String(isikukoodCheckDigit((parts.g+parts.y+parts.m+parts.d+parts.s).split('').map(Number)));
     const eesnimi=pick(isMale?NAMES.m:NAMES.f),perekonnanimi=pick(NAMES.last);
     const item={code:parts.g+parts.y+parts.m+parts.d+parts.s+parts.c,parts,year,month,day,isMale,eesnimi,perekonnanimi,name:eesnimi+' '+perekonnanimi};
-    if(opts.age) item.vanus=ageFrom(year,month,day);
-    if(opts.mail) item.epost=translit(eesnimi)+'.'+translit(perekonnanimi)+'@example.com';
+    if(opts.age)item.vanus=ageFrom(year,month,day);
+    if(opts.mail)item.epost=translit(eesnimi)+'.'+translit(perekonnanimi)+'@example.com';
     if(opts.addr){const a=generateAddress();item.tanav=a.tanav;item.sihtnumber=a.sihtnumber;item.linn=a.linn;}
-    if(opts.iban) item.iban=generateIBAN();
+    if(opts.iban)item.iban=generateIBAN();
     return item;
+  }
+
+  // ---------- VIGASED ----------
+  function rebuild(it,ov,label){const p=Object.assign({},it.parts,ov);const c=isikukoodCheckDigit((p.g+p.y+p.m+p.d+p.s).split('').map(Number));return{code:p.g+p.y+p.m+p.d+p.s+c,defekt:label};}
+  const DEFECTS=[
+    it=>{const d=it.code.split('');d[10]=String((+d[10]+1)%10);return{code:d.join(''),defekt:'Vale kontrollnumber'};},
+    it=>rebuild(it,{m:'13'},'Olematu kuu (13)'),
+    it=>rebuild(it,{m:'02',d:'30'},'30. veebruar — olematu kuupäev'),
+    it=>rebuild(it,{d:'00'},'Päev 00'),
+    it=>{const p=it.parts;const c=isikukoodCheckDigit(('0'+p.y+p.m+p.d+p.s).split('').map(Number));return{code:'0'+p.y+p.m+p.d+p.s+c,defekt:'Vale sajandi/soo number (0)'};},
+    it=>({code:it.code.slice(0,10),defekt:'Liiga lühike (10 numbrit)'}),
+    it=>({code:it.code+String(rnd(10)),defekt:'Liiga pikk (12 numbrit)'}),
+    it=>{const d=it.code.split('');d[5]='X';return{code:d.join(''),defekt:'Sisaldab tähte'};}
+  ];
+
+  // ---------- PIIRIPEALSED ----------
+  function edgeCases(){
+    const t=new Date();
+    return [
+      {code:makeCode(2000,2,29,1,true),   juhtum:'29. veebruar — liigaasta 2000'},
+      {code:makeCode(1996,2,29,7,false),  juhtum:'29. veebruar — liigaasta 1996'},
+      {code:makeCode(1999,12,31,999,false),juhtum:'Sajandi viimane päev · järjekord 999'},
+      {code:makeCode(2000,1,1,0,true),    juhtum:'Sajandivahetus · järjekord 000'},
+      {code:makeCode(1800,1,1,1,true),    juhtum:'Vanim lubatud sajand (1800)'},
+      {code:makeCode(2100,1,1,1,false),   juhtum:'Tulevikusajand (2100)'},
+      {code:makeCode(t.getFullYear(),t.getMonth()+1,t.getDate(),1,true), juhtum:'Täna sündinu · vanus 0'}
+    ];
   }
 
   // ---------- eksport ----------
   let current=[];
   function toRows(items){
+    if(items[0]&&items[0].special) return items.map(it=>({isikukood:it.code,kirjeldus:it.label}));
     return items.map(it=>{
       const r={isikukood:it.code,eesnimi:it.eesnimi,perekonnanimi:it.perekonnanimi,sugu:it.isMale?'M':'N',synniaeg:it.year+'-'+pad(it.month,2)+'-'+pad(it.day,2)};
       if(it.vanus!=null)r.vanus=it.vanus;
@@ -305,44 +349,85 @@
   function toSQL(rs){const cols=Object.keys(rs[0]);const q=v=>"'"+String(v).replace(/'/g,"''")+"'";const vals=rs.map(r=>'  ('+cols.map(c=>q(r[c])).join(', ')+')').join(',\n');return 'INSERT INTO isikud ('+cols.join(', ')+') VALUES\n'+vals+';';}
   function download(name,text,mime){const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
   function flash(btn,label){const old=btn.textContent;btn.textContent=label;btn.classList.add('ok');setTimeout(()=>{btn.textContent=old;btn.classList.remove('ok');},1100);}
+  function copyText(txt,btn,ok){navigator.clipboard.writeText(txt).then(()=>flash(btn,ok));}
 
-  // ---------- UI: generaator ----------
-  let genderPref='any';
+  // ---------- UI: režiim + sugu ----------
+  let mode='valid', genderPref='any';
+  const HINTS={valid:'Terviklikud fiktiivsed identiteedid kehtiva kontrollnumbriga.',invalid:'Sihilikult katkised koodid — valideerija näitab iga vea põhjust.',edge:'Fikseeritud keerulised, kuid kehtivad juhud. Kogus ja seeme ei mõjuta.'};
+  const modeEl=document.getElementById('mode');
+  modeEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;mode=b.dataset.m;[...modeEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));document.getElementById('modeHint').textContent=HINTS[mode];document.getElementById('fieldsRow').style.display=mode==='valid'?'':'none';});
+  document.getElementById('modeHint').textContent=HINTS.valid;
   const genderEl=document.getElementById('gender');
   genderEl.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;genderPref=b.dataset.g;[...genderEl.children].forEach(x=>x.setAttribute('aria-pressed',x===b));});
   const MONTHS=['jaan','veebr','märts','apr','mai','juuni','juuli','aug','sept','okt','nov','dets'];
-  function copyText(txt,btn,ok){navigator.clipboard.writeText(txt).then(()=>flash(btn,ok));}
 
+  // ---------- ID-kaart ----------
+  const SIL='<svg viewBox="0 0 70 88" xmlns="http://www.w3.org/2000/svg"><g fill="#b9c8dc"><circle cx="35" cy="31" r="17"/><path d="M6 88 C6 63 19 53 35 53 C51 53 64 63 64 88 Z"/></g></svg>';
+  function renderHero(it){
+    const bd=pad(it.day,2)+'.'+pad(it.month,2)+'.'+it.year;
+    document.getElementById('hero').innerHTML=
+      '<div class="idcard"><div class="mark">NÄIDIS</div>'+
+      '<div class="top"><span class="c1">EESTI · ESTONIA</span><span class="c2">Isikutunnistus</span></div>'+
+      '<div class="body"><div class="photo">'+SIL+'</div><div class="fields">'+
+        '<div class="f"><span class="k">Perekonnanimi / Surname</span><span class="v nm">'+it.perekonnanimi.toUpperCase()+'</span></div>'+
+        '<div class="f"><span class="k">Eesnimi / Given name</span><span class="v nm">'+it.eesnimi+'</span></div>'+
+        '<div class="f"><span class="k">Isikukood / Personal code</span><span class="v">'+it.code+'</span></div>'+
+        '<div class="grid2"><div class="f"><span class="k">Sünniaeg / Date of birth</span><span class="v">'+bd+'</span></div>'+
+        '<div class="f"><span class="k">Sugu / Sex</span><span class="v">'+(it.isMale?'M':'N')+'</span></div></div>'+
+      '</div></div></div>';
+  }
+
+  // ---------- renderdus ----------
   function renderAnatomy(it){
     const p=it.parts;
     const groups=[['g','sajand & sugu',p.g],['y','aasta',p.y],['m','kuu',p.m],['d','päev',p.d],['s','järjekord',p.s],['c','kontroll',p.c]];
-    const row=groups.map(([k,lab,val])=>`<div class="grp g-${k}"><div class="digits">${val}</div><div class="lab">${lab}</div></div>`).join('');
-    const sugu=it.isMale?'mees':'naine';
-    let meta=`<b>${it.name}</b> · ${sugu} · sündinud <b>${it.day}. ${MONTHS[it.month-1]} ${it.year}</b>`;
-    if(it.vanus!=null)meta+=` (${it.vanus} a.)`;
-    if(it.iban)meta+=` · <span class="ib">${it.iban}</span>`;
-    document.getElementById('anatomy').innerHTML=`<div class="cap">Koodi ülesehitus</div><div class="code-row">${row}</div><div class="meta">${meta}</div>`;
+    document.getElementById('anatomy').innerHTML='<div class="cap">Koodi ülesehitus</div><div class="code-row">'+groups.map(([k,lab,val])=>'<div class="grp g-'+k+'"><div class="digits">'+val+'</div><div class="lab">'+lab+'</div></div>').join('')+'</div>';
   }
+  function mkBtn(label,val){const b=document.createElement('button');b.className='copy';b.textContent=label;b.onclick=()=>copyText(val,b,'✓');return b;}
 
   function render(items){
     current=items;
     document.getElementById('output').hidden=false;
+    document.getElementById('hero').style.display='';
+    document.getElementById('anatomy').style.display='';
+    renderHero(items[0]);
     renderAnatomy(items[0]);
     document.getElementById('listCap').textContent=items.length+(items.length===1?' kirje':' kirjet');
     const ul=document.getElementById('list');ul.innerHTML='';
     items.forEach(it=>{
       const li=document.createElement('li');
-      let entry=`<span class="val">${it.code}</span><span class="who">${it.name}${it.vanus!=null?' · '+it.vanus+' a.':''}</span>`;
-      if(it.epost)entry+=`<span class="line">${it.epost}</span>`;
-      if(it.tanav)entry+=`<span class="line">${it.tanav}, ${it.sihtnumber} ${it.linn}</span>`;
-      if(it.iban)entry+=`<span class="iban">${it.iban}</span>`;
-      li.innerHTML=`<div class="entry">${entry}</div>`;
+      let entry='<span class="val">'+it.code+'</span><span class="who">'+it.name+(it.vanus!=null?' · '+it.vanus+' a.':'')+'</span>';
+      if(it.epost)entry+='<span class="line">'+it.epost+'</span>';
+      if(it.tanav)entry+='<span class="line">'+it.tanav+', '+it.sihtnumber+' '+it.linn+'</span>';
+      if(it.iban)entry+='<span class="iban">'+it.iban+'</span>';
+      li.innerHTML='<div class="entry">'+entry+'</div>';
       const actions=document.createElement('div');actions.className='actions';
-      const mk=(label,val)=>{const b=document.createElement('button');b.className='copy';b.textContent=label;b.onclick=()=>copyText(val,b,'✓');return b;};
-      actions.appendChild(mk('kood',it.code));
-      actions.appendChild(mk('nimi',it.name));
-      if(it.epost)actions.appendChild(mk('e-post',it.epost));
-      if(it.iban)actions.appendChild(mk('iban',it.iban));
+      actions.appendChild(mkBtn('kood',it.code));
+      actions.appendChild(mkBtn('nimi',it.name));
+      if(it.epost)actions.appendChild(mkBtn('e-post',it.epost));
+      if(it.iban)actions.appendChild(mkBtn('iban',it.iban));
+      li.appendChild(actions);ul.appendChild(li);
+    });
+  }
+
+  function renderSpecial(items,kind){
+    current=items;
+    document.getElementById('output').hidden=false;
+    document.getElementById('hero').style.display='none';
+    document.getElementById('anatomy').style.display='none';
+    document.getElementById('listCap').textContent=items.length+(items.length===1?' kirje':' kirjet');
+    const ul=document.getElementById('list');ul.innerHTML='';
+    items.forEach(it=>{
+      const r=validateIsikukood(it.code);
+      const li=document.createElement('li');
+      li.innerHTML='<div class="entry"><span class="val">'+it.code+'</span><span class="line">'+it.label+'</span></div>';
+      const actions=document.createElement('div');actions.className='actions';
+      const badge=document.createElement('span');
+      const good = kind==='edge' ? r.valid : !r.valid; // vigased: hea kui valideerija LÜKKAB tagasi
+      badge.className='badge '+(good?'b-ok':'b-bad');
+      badge.textContent = kind==='invalid' ? (r.valid?'püüdmata!':'✕ '+r.error) : (r.valid?'✓ kehtiv':'✕ '+r.error);
+      actions.appendChild(badge);
+      actions.appendChild(mkBtn('kood',it.code));
       li.appendChild(actions);ul.appendChild(li);
     });
   }
@@ -354,41 +439,40 @@
     if(yFrom>yTo)[yFrom,yTo]=[yTo,yFrom];
     const seed=document.getElementById('seed').value.trim();
     RNG=seed?mulberry32(xmur3(seed)()):Math.random;
-    const opts={age:document.getElementById('fAge').checked,mail:document.getElementById('fMail').checked,addr:document.getElementById('fAddr').checked,iban:document.getElementById('fIban').checked};
-    render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,opts)));
+    if(mode==='invalid'){
+      const items=Array.from({length:count},(_,i)=>{const base=generateOne(yFrom,yTo,genderPref,{});const def=DEFECTS[i%DEFECTS.length](base);return{code:def.code,label:def.defekt,special:true};});
+      renderSpecial(items,'invalid');
+    } else if(mode==='edge'){
+      const items=edgeCases().map(e=>({code:e.code,label:e.juhtum,special:true}));
+      renderSpecial(items,'edge');
+    } else {
+      const opts={age:document.getElementById('fAge').checked,mail:document.getElementById('fMail').checked,addr:document.getElementById('fAddr').checked,iban:document.getElementById('fIban').checked};
+      render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,opts)));
+    }
   }
   document.getElementById('gen').addEventListener('click',run);
-
   document.getElementById('copyAll').onclick=e=>copyText(toTSV(toRows(current)),e.target,'✓');
   document.getElementById('expCsv').onclick=()=>download('testandmed.csv',toCSV(toRows(current)),'text/csv');
   document.getElementById('expJson').onclick=()=>download('testandmed.json',JSON.stringify(toRows(current),null,2),'application/json');
   document.getElementById('expSql').onclick=e=>copyText(toSQL(toRows(current)),e.target,'✓ SQL');
 
-  // ---------- UI: isikukoodi valideerija ----------
+  // ---------- valideerijad ----------
   const vres=document.getElementById('vresult');
   function doValidate(){
     const tokens=document.getElementById('vinput').value.split(/[\s,;]+/).filter(Boolean);
     if(tokens.length===0){vres.className='vresult';return;}
-    if(tokens.length===1){
-      const r=validateIsikukood(tokens[0]);
-      vres.className='vresult show single';
-      vres.innerHTML=r.valid?`<span class="badge b-ok">kehtiv</span><b>${r.gender}</b>, sündinud <b>${r.birthDate}</b>, järjekorranumber ${r.serial}`:`<span class="badge b-bad">vigane</span>${r.error}`;
-      return;
-    }
-    let ok=0;
-    const rows=tokens.map(t=>{const r=validateIsikukood(t);if(r.valid)ok++;return `<div class="vitem"><span class="badge ${r.valid?'b-ok':'b-bad'}">${r.valid?'✓':'✕'}</span><span class="c">${t}</span><span class="why">${r.valid?r.birthDate+' · '+r.gender:r.error}</span></div>`;}).join('');
-    vres.className='vresult show';
-    vres.innerHTML=`<div class="vsum"><b>${ok}</b>/${tokens.length} kehtivat</div><div class="vlist">${rows}</div>`;
+    if(tokens.length===1){const r=validateIsikukood(tokens[0]);vres.className='vresult show single';vres.innerHTML=r.valid?'<span class="badge b-ok">kehtiv</span><b>'+r.gender+'</b>, sündinud <b>'+r.birthDate+'</b>, järjekorranumber '+r.serial:'<span class="badge b-bad">vigane</span>'+r.error;return;}
+    let ok=0;const rows=tokens.map(t=>{const r=validateIsikukood(t);if(r.valid)ok++;return '<div class="vitem"><span class="badge '+(r.valid?'b-ok':'b-bad')+'">'+(r.valid?'✓':'✕')+'</span><span class="c">'+t+'</span><span class="why">'+(r.valid?r.birthDate+' · '+r.gender:r.error)+'</span></div>';}).join('');
+    vres.className='vresult show';vres.innerHTML='<div class="vsum"><b>'+ok+'</b>/'+tokens.length+' kehtivat</div><div class="vlist">'+rows+'</div>';
   }
   document.getElementById('vbtn').addEventListener('click',doValidate);
 
-  // ---------- UI: IBAN-i kontroll ----------
   const ibres=document.getElementById('ibresult');
   function doValidateIBAN(){
     const val=document.getElementById('ibinput').value.trim();
     if(!val){ibres.className='vresult';return;}
     const r=validateIBAN(val);
-    if(!r.valid){ibres.className='vresult show single';ibres.innerHTML=`<span class="badge b-bad">vigane</span>${r.error}`;return;}
+    if(!r.valid){ibres.className='vresult show single';ibres.innerHTML='<span class="badge b-bad">vigane</span>'+r.error;return;}
     const kv=[['Riik',r.countryName+' ('+r.country+')']];
     if(r.bankName)kv.push(['Pank',r.bankName]);
     if(r.bic)kv.push(['BIC / SWIFT',r.bic]);
@@ -396,7 +480,7 @@
     if(r.accountNumber)kv.push(['Kontonumber',r.accountNumber]);
     kv.push(['Kontrollnumbrid',r.checkDigits]);
     ibres.className='vresult show';
-    ibres.innerHTML=`<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>${r.formatted}</b></div>`+'<dl class="kv">'+kv.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join('')+'</dl>';
+    ibres.innerHTML='<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>'+r.formatted+'</b></div><dl class="kv">'+kv.map(kvp=>'<dt>'+kvp[0]+'</dt><dd>'+kvp[1]+'</dd>').join('')+'</dl>';
   }
   document.getElementById('ibbtn').addEventListener('click',doValidateIBAN);
   document.getElementById('ibinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidateIBAN();});
