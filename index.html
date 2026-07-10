@@ -124,6 +124,20 @@
   .kv dt{color:var(--muted);}
   .kv dd{margin:0;color:var(--ink);font-family:var(--mono);word-break:break-all;}
 
+  details.guide{overflow:hidden;}
+  .guide summary{cursor:pointer;padding:16px 18px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);list-style:none;display:flex;justify-content:space-between;align-items:center;}
+  .guide summary::-webkit-details-marker{display:none;}
+  .guide summary::after{content:'▸';color:var(--muted);transition:transform .15s;}
+  .guide[open] summary::after{transform:rotate(90deg);}
+  .guide .gbody{padding:2px 18px 20px;font-size:13.5px;line-height:1.65;color:#2b3138;}
+  .guide h4{font-size:13px;font-weight:600;color:var(--ink);margin:18px 0 6px;}
+  .guide h4:first-child{margin-top:6px;}
+  .guide p{margin:0 0 8px;}
+  .guide ul.g{margin:0 0 8px;padding-left:20px;}
+  .guide ul.g li{margin:3px 0;}
+  .guide b{font-weight:600;color:var(--ink);}
+  .guide code{font-family:var(--mono);background:var(--paper);border:1px solid var(--line);padding:1px 5px;border-radius:4px;font-size:12px;}
+
   .foot{margin-top:20px;font-size:12px;color:var(--muted);line-height:1.6;}
   .foot code{font-family:var(--mono);background:var(--surface);border:1px solid var(--line);padding:1px 5px;border-radius:4px;font-size:11.5px;}
 
@@ -223,6 +237,51 @@
       <div class="vresult" id="ibresult"></div>
     </div>
   </div>
+
+  <details class="card guide">
+    <summary>Kasutusjuhend</summary>
+    <div class="gbody">
+      <p>Tööriist loob kehtiva kontrollnumbriga Eesti isikukoode ja terviklikke fiktiivseid identiteete (nimi, vanus, e-post, aadress, IBAN) testimiseks. Lisaks saab olemasolevaid koode ja IBAN-e kontrollida.</p>
+
+      <h4>1. Vali režiim</h4>
+      <ul class="g">
+        <li><b>Kehtivad</b> — usutavad, kehtivad andmed igapäevaseks testimiseks.</li>
+        <li><b>Vigased</b> — sihilikult katkised koodid (vale kontrollnumber, olematu kuupäev jm), et testida, kas su valideerimine püüab vead kinni. Iga rea juures näidatakse päris veapõhjust.</li>
+        <li><b>Piiripealsed</b> — keerulised kehtivad juhud: 29. veebruar liigaastal, sajandivahetus, järjekord 000/999, vanim ja tulevikusajand, täna sündinu.</li>
+      </ul>
+
+      <h4>2. Sätted</h4>
+      <ul class="g">
+        <li><b>Sugu</b> ja <b>sünniaasta vahemik</b> — piira, milliseid koode luuakse.</li>
+        <li><b>Kogus</b> — mitu kirjet genereerida (kuni 500).</li>
+        <li><b>Seeme</b> — jäta tühjaks juhusliku tulemuse jaoks. Kirjuta midagi (nt <code>test1</code>), kui tahad, et sama seeme annaks iga kord täpselt sama komplekti (korratavad testid).</li>
+        <li><b>Lisaväljad</b> — märgi, millised väljad kaasa panna: vanus, e-post, aadress, IBAN.</li>
+      </ul>
+
+      <h4>3. Genereeri ja kopeeri</h4>
+      <p>Vajuta <b>Genereeri</b>. „Kehtivad" režiimis kuvatakse esimene isik ID-kaardina ja all koodi struktuur. Iga rea juures saab kopeerida koodi, nime, e-posti või IBAN-i eraldi.</p>
+
+      <h4>4. Ekspordi</h4>
+      <ul class="g">
+        <li><b>Kopeeri (TSV)</b> — päisega tabel, mille saab otse Excelisse või tabelisse kleepida.</li>
+        <li><b>CSV / JSON</b> — laeb faili alla.</li>
+        <li><b>SQL</b> — kopeerib <code>INSERT INTO isikud (...)</code> lause. Veerud lisanduvad vastavalt sellele, millised lisaväljad on sisse lülitatud.</li>
+      </ul>
+
+      <h4>Valideerija</h4>
+      <p>Sisesta <b>üks kood</b> detailseks tulemuseks (sugu, sünniaeg, järjekorranumber) või kleebi <b>terve loend</b> (üks rea kohta) — saad iga koodi kohta pass/fail ja kokkuvõtte.</p>
+
+      <h4>IBAN-i kontroll</h4>
+      <p>Sisesta IBAN (tühikutega või ilma). Näed kehtivust (mod-97), riiki, panka, BIC-i ja kontonumbrit.</p>
+
+      <h4>Näpunäited</h4>
+      <ul class="g">
+        <li>Sama vea taastekitamiseks kasuta sama <b>seemet</b> — pole vaja koode käsitsi salvestada.</li>
+        <li>Veaharude testimiseks kasuta režiimi <b>Vigased</b>; edukäigu ja piirjuhtude jaoks <b>Piiripealsed</b>.</li>
+        <li>Andmed on fiktiivsed — sobivad testimiseks, aga aadressid ei ole geograafiliselt reaalsed.</li>
+      </ul>
+    </div>
+  </details>
 
   <p class="foot">
     Struktuur: <code>G&nbsp;YY&nbsp;MM&nbsp;DD&nbsp;SSS&nbsp;C</code> — sajand ja sugu, sünnikuupäev, järjekorranumber ja mooduli&nbsp;11 kontrollnumber.
