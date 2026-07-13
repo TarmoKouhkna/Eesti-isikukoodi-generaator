@@ -473,6 +473,22 @@ function generateKMKR(){
   return 'EE'+d.join('')+kmkrCheckDigit(d);
 }
 
+/* ---------- Äriregistri päring (avalik autocomplete-teenus, ei nõua lepingut) ---------- */
+const ARIREG_SEARCH='https://ariregister.rik.ee/est';
+function ariregLookup(code){
+  const url='https://ariregister.rik.ee/est/api/autocomplete?q='+encodeURIComponent(code);
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),6000);
+  return fetch(url,{signal:ctrl.signal})
+    .then(r=>{clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .then(data=>{
+      const list=Array.isArray(data)?data:(data&&data.data)?data.data:[];
+      const hit=list.find(x=>String(x.reg_code||x.registrikood||'')===String(code));
+      return hit||null;
+    })
+    .catch(err=>{clearTimeout(t);throw err;});
+}
+
 /* ---------- IBAN ---------- */
 const BANKS=["10","17","22","42","77"];
 function ibanDomesticCheck(b){const w=[7,3,1];let s=0;for(let i=0;i<b.length;i++)s+=Number(b[i])*w[i%3];return (10-(s%10))%10;}
@@ -1125,13 +1141,50 @@ $('rkbtn').addEventListener('click',()=>{
   if(!val){res.className='vresult';return;}
   const r=validateBusinessId(val);
   if(!r.valid){res.className='vresult show single';res.innerHTML='<span class="badge b-bad">vigane</span>'+esc(r.error);return;}
-  const kv=[['Tüüp',r.type],['Kood',r.code]];
-  if(r.type==='KMKR number')kv.push(['Kontrolli kehtivust','ariregister.rik.ee või VIES']);
-  else kv.push(['Kontrolli andmeid','ariregister.rik.ee']);
+
   res.className='vresult show';
-  res.innerHTML='<div style="margin-bottom:4px;"><span class="badge b-ok">kehtiv kontrollnumber</span><b>'+r.code+'</b></div><dl class="kv">'+
-    kv.map(k=>'<dt>'+k[0]+'</dt><dd>'+k[1]+'</dd>').join('')+'</dl>'+
-    '<p class="note">Kontrollnumber on korrektne, aga see <b>ei tähenda, et kood on kasutusel</b> — tegelikku olemasolu saab kontrollida äriregistrist.</p>';
+  const head='<div style="margin-bottom:4px;"><span class="badge b-ok">kehtiv kontrollnumber</span><b>'+r.code+'</b></div>';
+
+  if(r.type==='KMKR number'){
+    res.innerHTML=head+'<dl class="kv"><dt>Tüüp</dt><dd>KMKR number</dd><dt>Kood</dt><dd>'+r.code+'</dd></dl>'+
+      '<p class="note">Kontrollnumber on korrektne, aga see <b>ei tähenda, et number on kasutusel</b>. Kehtivust kontrolli '+
+      '<a href="https://ec.europa.eu/taxation_customs/vies/" target="_blank" rel="noopener">VIES-ist</a> või '+
+      '<a href="https://www.emta.ee/" target="_blank" rel="noopener">MTA päringust</a>. KMKR number ei ole sama mis registrikood.</p>';
+    return;
+  }
+
+  // Registrikood — proovi äriregistrist ärinime
+  res.innerHTML=head+'<dl class="kv"><dt>Tüüp</dt><dd>Registrikood</dd><dt>Kood</dt><dd>'+r.code+'</dd>'+
+    '<dt>Ärinimi</dt><dd id="rkName" style="color:var(--muted);">päring äriregistrisse…</dd></dl><div id="rkExtra"></div>';
+
+  ariregLookup(r.code).then(hit=>{
+    const nameEl=$('rkName'),extra=$('rkExtra');
+    if(!nameEl) return;
+    if(!hit){
+      nameEl.style.color='var(--muted)';
+      nameEl.textContent='registris ei leitud';
+      extra.innerHTML='<p class="note">Kontrollnumber on korrektne, aga selle koodiga <b>kehtivat juriidilist isikut ei leitud</b>. Avaandmetes on ainult registris olevad isikud (sh likvideerimisel ja pankrotis) — kustutatud ettevõtteid seal pole. Kontrolli <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a>.</p>';
+      return;
+    }
+    nameEl.style.color='var(--ink)';
+    nameEl.textContent=hit.name||'(nimi puudub)';
+    const rows=[];
+    if(hit.status)rows.push(['Staatus',esc(hit.status)]);
+    const addr=hit.legal_address||hit.aadress;
+    if(addr)rows.push(['Aadress',esc(addr)+(hit.zip_code?' ('+esc(hit.zip_code)+')':'')]);
+    let html='';
+    if(rows.length)html+='<dl class="kv">'+rows.map(x=>'<dt>'+x[0]+'</dt><dd>'+x[1]+'</dd>').join('')+'</dl>';
+    const link=hit.url||ARIREG_SEARCH;
+    html+='<p class="note">Andmed: <b>e-äriregistri avalik autocomplete-teenus</b> (uuendatakse kord ööpäevas). '+
+      '<a href="'+esc(link)+'" target="_blank" rel="noopener">Vaata äriregistris →</a></p>';
+    extra.innerHTML=html;
+  }).catch(()=>{
+    const nameEl=$('rkName'),extra=$('rkExtra');
+    if(!nameEl) return;
+    nameEl.style.color='var(--muted)';
+    nameEl.textContent='päring ei õnnestunud';
+    extra.innerHTML='<p class="note">Ärinime ei õnnestunud pärida — brauser võib blokeerida päringu teisele domeenile (CORS) või puudub ühendus. Kontrollnumber on ikkagi korrektne. Otsi kood üles <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a>.</p>';
+  });
 });
 
 $('ibbtn').addEventListener('click',()=>{
