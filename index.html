@@ -475,6 +475,18 @@ function generateKMKR(){
 
 /* ---------- Äriregistri päring (avalik autocomplete-teenus, ei nõua lepingut) ---------- */
 const ARIREG_SEARCH='https://ariregister.rik.ee/est';
+const INFOREG_HOME='https://www.inforegister.ee/';
+// Inforegistri lehe kuju: /10060701-SWEDBANK-AS/
+function inforegisterUrl(code,name){
+  if(!name) return INFOREG_HOME;
+  const map={'õ':'o','ä':'a','ö':'o','ü':'u','š':'s','ž':'z'};
+  const slug=String(name).toLowerCase()
+    .replace(/[õäöüšž]/g,c=>map[c])
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-+|-+$/g,'')
+    .toUpperCase();
+  return INFOREG_HOME+code+(slug?'-'+slug:'')+'/';
+}
 function ariregLookup(code){
   const url='https://ariregister.rik.ee/est/api/autocomplete?q='+encodeURIComponent(code);
   const ctrl=new AbortController();
@@ -1163,7 +1175,7 @@ $('rkbtn').addEventListener('click',()=>{
     if(!hit){
       nameEl.style.color='var(--muted)';
       nameEl.textContent='registris ei leitud';
-      extra.innerHTML='<p class="note">Kontrollnumber on korrektne, aga selle koodiga <b>kehtivat juriidilist isikut ei leitud</b>. Avaandmetes on ainult registris olevad isikud (sh likvideerimisel ja pankrotis) — kustutatud ettevõtteid seal pole. Kontrolli <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a>.</p>';
+      extra.innerHTML='<p class="note">Kontrollnumber on korrektne, aga selle koodiga <b>kehtivat juriidilist isikut ei leitud</b>. Avaandmetes on ainult registris olevad isikud (sh likvideerimisel ja pankrotis) — kustutatud ettevõtteid seal pole. Kontrolli <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a> või <a href="'+INFOREG_HOME+'" target="_blank" rel="noopener">Inforegistrist</a>.</p>';
       return;
     }
     nameEl.style.color='var(--ink)';
@@ -1175,15 +1187,18 @@ $('rkbtn').addEventListener('click',()=>{
     let html='';
     if(rows.length)html+='<dl class="kv">'+rows.map(x=>'<dt>'+x[0]+'</dt><dd>'+x[1]+'</dd>').join('')+'</dl>';
     const link=hit.url||ARIREG_SEARCH;
-    html+='<p class="note">Andmed: <b>e-äriregistri avalik autocomplete-teenus</b> (uuendatakse kord ööpäevas). '+
-      '<a href="'+esc(link)+'" target="_blank" rel="noopener">Vaata äriregistris →</a></p>';
+    const ireg=inforegisterUrl(r.code,hit.name);
+    html+='<p class="note">Andmed: <b>e-äriregistri avalik autocomplete-teenus</b> (uuendatakse kord ööpäevas).<br>'+
+      '<a href="'+esc(link)+'" target="_blank" rel="noopener">Vaata äriregistris →</a> &nbsp;·&nbsp; '+
+      '<a href="'+esc(ireg)+'" target="_blank" rel="noopener">Vaata Inforegistris →</a> '+
+      '<span style="font-size:11px;">(majandusnäitajad, maksuvõlad, juhatus)</span></p>';
     extra.innerHTML=html;
   }).catch(()=>{
     const nameEl=$('rkName'),extra=$('rkExtra');
     if(!nameEl) return;
     nameEl.style.color='var(--muted)';
     nameEl.textContent='päring ei õnnestunud';
-    extra.innerHTML='<p class="note">Ärinime ei õnnestunud pärida — brauser võib blokeerida päringu teisele domeenile (CORS) või puudub ühendus. Kontrollnumber on ikkagi korrektne. Otsi kood üles <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a>.</p>';
+    extra.innerHTML='<p class="note">Ärinime ei õnnestunud pärida — brauser võib blokeerida päringu teisele domeenile (CORS) või puudub ühendus. Kontrollnumber on ikkagi korrektne. Otsi kood üles <a href="'+ARIREG_SEARCH+'" target="_blank" rel="noopener">äriregistrist</a> või <a href="'+INFOREG_HOME+'" target="_blank" rel="noopener">Inforegistrist</a>.</p>';
   });
 });
 
