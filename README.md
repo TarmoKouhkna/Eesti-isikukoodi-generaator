@@ -22,6 +22,8 @@ Veebipõhine tööriist Eesti isikukoodide ja fiktiivsete testidentiteetide loom
 - **Eksport** — CSV ja JSON allalaadimine, `INSERT`-lause kopeerimine
 - **Isikukoodi valideerija** — kontrolli üht koodi või kleebi terve loend korraga (pass/fail + põhjus)
 - **IBAN-i kontroll** — mod-97 valideerimine ning riigi, panga, BIC-i ja kontonumbri tuletamine
+- **Telefoninumbri kontroll** — formaadi ja numbritüübi tuvastus (mobiil, lauatelefon, 800/900 teenusnumber, lühinumber, hädaabi) ning E.164 vorming
+- **Sisseehitatud kasutusjuhend** lehel
 
 ## Kasutamine
 
@@ -45,6 +47,16 @@ Ava veebiversioon [siit](https://tarmokouhkna.github.io/Eesti-isikukoodi-generaa
 | 22 | Swedbank | HABAEE2X |
 | 42 | Coop Pank | EKRDEE22 |
 | 77 | LHV Pank | LHVBEE22 |
+
+## Telefoninumbri kontroll — mida saab ja mida ei saa
+
+Tööriist kontrollib **formaati ja numbritüüpi**. Ta **ei tuvasta isikut ega operaatorit**:
+
+- **Isikut ei saa numbri järgi tuvastada.** Elektroonilise side seadus ja GDPR keelavad sideettevõtjal abonendi andmete avaldamist kolmandale isikule; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
+- **Operaatorit ei saa prefiksist järeldada**, sest numbriliikuvus lubab abonendil operaatorit vahetades numbri kaasa võtta. Numbri tegeliku kuuluvuse saab kontrollida [TTJA numbrikuuluvuse päringust](https://nba.ttja.ee/numbriparing.aspx).
+- Ahistamise või kelmuse korral tee avaldus politseile (politsei.ee).
+
+Eesti numbriseeriad: mobiil 50–59 ja 81–84 (7–8 numbrit), lauatelefon 32–33, 35, 38–39, 43–48, 60–68, 71–79, 88 (7 numbrit), teenusnumbrid 800 (tasuta) ja 900 (tasuline), riigikood +372.
 
 ## Litsents
 

@@ -123,6 +123,9 @@
   .kv{margin:12px 0 0;display:grid;grid-template-columns:auto 1fr;gap:7px 16px;font-size:13px;}
   .kv dt{color:var(--muted);}
   .kv dd{margin:0;color:var(--ink);font-family:var(--mono);word-break:break-all;}
+  .note{margin:14px 0 0;padding:11px 12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;font-size:12px;line-height:1.6;color:var(--muted);}
+  .note b{color:var(--ink);font-weight:600;}
+  .note a{color:var(--accent-ink);}
 
   details.guide{overflow:hidden;}
   .guide summary{cursor:pointer;padding:16px 18px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);list-style:none;display:flex;justify-content:space-between;align-items:center;}
@@ -238,6 +241,23 @@
     </div>
   </div>
 
+  <div class="card">
+    <div class="ctitle">Telefoninumbri kontroll</div>
+    <div class="valwrap">
+      <label for="phinput" style="display:block;margin-bottom:8px;">Sisesta number — kontrollime formaati ja numbritüüpi</label>
+      <input type="text" id="phinput" placeholder="+372 5123 4567" autocomplete="off">
+      <div class="vbtnrow"><button class="vbtn" id="phbtn">Kontrolli</button></div>
+      <div class="vresult" id="phresult"></div>
+      <p class="note">
+        <b>Isikut numbri järgi tuvastada ei saa</b> — elektroonilise side seadus ja GDPR keelavad operaatoril abonendi andmete avaldamise; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
+        Ka <b>operaatorit ei saa prefiksist järeldada</b>, sest numbriliikuvus lubab numbri operaatorite vahel kaasa võtta.
+        Numbri tegeliku kuuluvuse (sideettevõtja) saab kontrollida TTJA numbrikuuluvuse päringust:
+        <a href="https://nba.ttja.ee/numbriparing.aspx" target="_blank" rel="noopener">nba.ttja.ee/numbriparing.aspx</a>.
+        Ahistamise või kelmuse korral tee avaldus politseile (politsei.ee).
+      </p>
+    </div>
+  </div>
+
   <details class="card guide">
     <summary>Kasutusjuhend</summary>
     <div class="gbody">
@@ -332,7 +352,50 @@
     return info;
   }
 
-  // ---------- nimed, aadressid ----------
+  // ---------- TELEFONINUMBER ----------
+  // NB! Numbriliikuvuse tõttu EI SAA prefiksist operaatorit järeldada.
+  // Kontrollime formaati ja numbritüüpi; operaatori tuvastamiseks -> TTJA numbrikuuluvuse päring.
+  const LANDLINE=[[32,33],[35,35],[38,39],[43,48],[60,68],[71,79],[88,88]];
+  function validatePhone(input){
+    const raw=String(input).trim();
+    if(!raw) return {valid:false,error:'Sisesta number'};
+    if(/[^\d\s+()\-.]/.test(raw)) return {valid:false,error:'Sisaldab lubamatuid märke'};
+    let d=raw.replace(/[^\d+]/g,'');
+    let intl=false;
+    if(d.startsWith('+372')){d=d.slice(4);intl=true;}
+    else if(d.startsWith('00372')){d=d.slice(5);intl=true;}
+    else if(d.startsWith('372')&&d.length>8){d=d.slice(3);intl=true;}
+    else if(d.startsWith('+')) return {valid:false,error:'Välisriigi number (mitte +372) — Eesti kontroll ei kehti'};
+    if(!/^\d+$/.test(d)) return {valid:false,error:'Vigane formaat'};
+
+    const n=d.length;
+    if(d==='112') return {valid:true,type:'Hädaabinumber',note:'Häirekeskus — tasuta, ka SIM-kaardita',len:n,digits:d,intl};
+
+    const p2=d.slice(0,2), p3=d.slice(0,3);
+    let type=null,note=null;
+
+    if(/^(5[0-9]|8[1-4])/.test(d)){
+      if(n!==7&&n!==8) return {valid:false,error:'Mobiilinumber peab olema 7–8 numbrit (sisestatud '+n+')'};
+      type='Mobiilinumber';
+      note=(p2>='81'&&p2<='84')?'Uuem 81–84 seeria — tavaline mobiilinumber, samaväärne 5x-numbritega':'Klassikaline 5x mobiiliseeria';
+    } else if(p3==='800'){
+      if(n<7||n>8) return {valid:false,error:'800-number peab olema 7–8 numbrit'};
+      type='Tasuta teenusnumber (800)'; note='Helistajale tasuta';
+    } else if(p3==='900'){
+      if(n<7||n>8) return {valid:false,error:'900-number peab olema 7–8 numbrit'};
+      type='Tasuline teenusnumber (900)'; note='Kõrgema tariifiga — ettevaatust kelmustega';
+    } else if(LANDLINE.some(r=>{const v=+p2;return v>=r[0]&&v<=r[1];})){
+      if(n!==7) return {valid:false,error:'Lauatelefoni number peab olema 7 numbrit (sisestatud '+n+')'};
+      type='Lauatelefon'; note='Geograafilist piirkonda ei saa numbrist usaldusväärselt tuletada';
+    } else if(n>=3&&n<=5){
+      type='Lühinumber'; note='Info-, teenus- või eriotstarbeline lühinumber';
+    } else {
+      return {valid:false,error:'Ei vasta ühelegi teadaolevale Eesti numbriseeriale ('+p2+'…)'};
+    }
+
+    const fmt = n===8 ? d.replace(/(\d{4})(\d{4})/,'$1 $2') : n===7 ? d.replace(/(\d{3})(\d{4})/,'$1 $2') : d;
+    return {valid:true,type,note,len:n,digits:d,intl,national:d,international:'+372 '+fmt,e164:'+372'+d};
+  }
   const NAMES={
     m:["Andres","Toomas","Mart","Priit","Rein","Kristjan","Marek","Indrek","Margus","Aivar","Raivo","Peeter","Kalev","Urmas","Jüri","Madis","Siim","Karl","Rasmus","Markus","Sander","Martin","Henri","Kaarel"],
     f:["Kadri","Mari","Tiiu","Anne","Liis","Katrin","Maarja","Kristiina","Piret","Riina","Kersti","Tuuli","Eve","Helen","Laura","Kätlin","Triin","Sofia","Eliise","Kaisa","Karin","Merike","Reet","Tiina"],
@@ -543,6 +606,25 @@
   }
   document.getElementById('ibbtn').addEventListener('click',doValidateIBAN);
   document.getElementById('ibinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidateIBAN();});
+
+  // ---------- telefoninumbri kontroll ----------
+  const phres=document.getElementById('phresult');
+  function doValidatePhone(){
+    const val=document.getElementById('phinput').value.trim();
+    if(!val){phres.className='vresult';return;}
+    const r=validatePhone(val);
+    if(!r.valid){phres.className='vresult show single';phres.innerHTML='<span class="badge b-bad">vigane</span>'+r.error;return;}
+    const kv=[['Tüüp',r.type]];
+    if(r.international)kv.push(['Rahvusvaheline',r.international]);
+    if(r.e164)kv.push(['E.164',r.e164]);
+    if(r.national)kv.push(['Riigisisene',r.national]);
+    kv.push(['Numbreid',r.len]);
+    if(r.note)kv.push(['Märkus',r.note]);
+    phres.className='vresult show';
+    phres.innerHTML='<div class="single" style="margin-bottom:4px;"><span class="badge b-ok">korrektne formaat</span><b>'+(r.international||r.digits)+'</b></div><dl class="kv">'+kv.map(k=>'<dt>'+k[0]+'</dt><dd>'+k[1]+'</dd>').join('')+'</dl>';
+  }
+  document.getElementById('phbtn').addEventListener('click',doValidatePhone);
+  document.getElementById('phinput').addEventListener('keydown',e=>{if(e.key==='Enter')doValidatePhone();});
 
   run(); // esmane näidis
 </script>
