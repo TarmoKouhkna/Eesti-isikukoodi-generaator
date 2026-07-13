@@ -435,13 +435,14 @@ function validateIsikukood(input){
 }
 function isAdult(code){const r=validateIsikukood(code);return r.valid?r.isAdult:false;}
 
-/* Järjekorranumbri neutraalne selgitus — faktid, mitte oletus sünnikoha kohta.
-   NB! Haiglavahemikud ei ole ametlikult avaldatud ja välismaal antud koodides
-   kasutati vahel ka lihtsalt suvalist vaba numbrit — seetõttu ei tuleta me siit midagi. */
+/* Järjekorranumbri neutraalne selgitus — ainult see, mis on tegelikult teada.
+   Haiglavahemike "teooriat" siin teadlikult ei esitata: vahemikud pole ametlikud,
+   enne 1989 (isikukoodi kasutuselevõtt) sündinutele anti kood tagantjärele ja
+   välismaal antud koodides kasutati ka suvalisi numbreid. */
 function serialNote(year,serial){
-  if(serial>=995) return 'Vahemik 995–999 on alates 2013 kasutusel surnult sündinu unikaalses koodis (mis ei ole isikukood). Muidu tavaline järjekorranumber.';
-  if(year>=2013) return 'Alates 2013 määrab infosüsteem numbri taotluste saabumise järjekorras — see ei kanna haigla ega sünnikoha tähendust.';
-  return 'Enne 2013 oli haiglatel oma numbrivahemikud, seega võib see vihjata sünnihaiglale. Vahemikud pole ametlikult avaldatud ja välismaal antud koodides kasutati ka suvalisi numbreid — seetõttu ei saa siit sünnikohta järeldada.';
+  if(serial>=995) return 'Vahemik 995–999 on alates 2013 kasutusel surnult sündinu unikaalses koodis (mis ei ole isikukood).';
+  if(year>=2013) return 'Alates 2013 määrab infosüsteem numbri taotluste saabumise järjekorras.';
+  return null;
 }
 
 /* ---------- REGISTRIKOOD & KMKR ---------- */
@@ -1141,11 +1142,12 @@ $('vbtn').addEventListener('click',()=>{
         ['Täisealine',r.isAdult?'jah (18+)':'ei — alaealine'],['Järjekorranumber',r.serial]];
       if(r.prefix)kv.unshift(['Sertifikaadi prefiks',r.prefix]);
       const year=+r.birthDate.slice(0,4);
+      const sn=serialNote(year,r.serial);
       vres.innerHTML='<div style="margin-bottom:4px;"><span class="badge b-ok">kehtiv</span><b>'+r.code+'</b>'+
         (r.isAdult?'':' <span class="badge b-warn">alaealine</span>')+'</div><dl class="kv">'+
         kv.map(k=>'<dt>'+k[0]+'</dt><dd>'+k[1]+'</dd>').join('')+'</dl>'+
-        '<p class="note"><b>Järjekorranumber '+pad(r.serial,3)+'</b> eristab samal päeval sündinud sama soost inimesi. '+
-        esc(serialNote(year,r.serial))+'<br><b>Sünnikohta ega kodakondsust isikukoodist tuletada ei saa</b> — koodis on ainult sugu, sünniaeg ja järjekorranumber.</p>';
+        '<p class="note"><b>Järjekorranumber '+pad(r.serial,3)+'</b> eristab samal päeval sündinud sama soost inimesi.'+
+        (sn?' '+esc(sn):'')+'<br><b>Sünnikohta ega kodakondsust isikukoodist tuletada ei saa</b> — koodis on ainult sugu, sünniaeg ja järjekorranumber.</p>';
     } else {
       vres.innerHTML='<span class="badge b-bad">vigane</span>'+esc(r.error);
     }
