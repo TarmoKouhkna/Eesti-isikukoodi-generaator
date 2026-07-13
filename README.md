@@ -1,33 +1,46 @@
 # Eesti isikukoodi generaator
 
-Veebipõhine tööriist Eesti isikukoodide ja fiktiivsete testidentiteetide loomiseks ning kontrollimiseks **testimise eesmärgil**. Loodud koodidel on kehtiv mooduli-11 kontrollnumber.
+Veebipõhine tööriist Eesti isikukoodide, ettevõtte registrikoodide ja fiktiivsete testidentiteetide loomiseks ning kontrollimiseks **testimise eesmärgil**.
 
 **Proovi järele:** https://tarmokouhkna.github.io/Eesti-isikukoodi-generaator/
 
-> Kõik koodid, nimed ja IBAN-id on juhuslikult loodud ega vasta ühelegi tegelikule isikule ega kontole.
+> Kõik genereeritud koodid, nimed, aadressid ja IBAN-id on juhuslikud ega vasta ühelegi tegelikule isikule, ettevõttele ega kontole.
 
 ## Võimalused
 
-- **Kolm režiimi**:
+### Generaator
+- **Neli režiimi**:
   - *Kehtivad* — terviklikud fiktiivsed identiteedid kehtiva kontrollnumbriga
-  - *Vigased* — sihilikult katkised koodid (vale kontrollnumber, olematu kuupäev, vale sugu-number, vale pikkus jm), valideerimise veaharude testimiseks
-  - *Piiripealsed* — keerulised kehtivad juhud (29. veebruar liigaastal, sajandivahetus, järjekord 000/999, vanim/tulevikusajand, täna sündinu)
-- **ID-kaardi vaade** — esiletõstetud isik stiliseeritud isikutunnistusena (NÄIDIS-vesimärgiga)
-- **Isikukoodid** kehtiva kontrollnumbriga; soo valik ja sünniaasta vahemik (1800–2199)
-- **Koodi ülesehituse selgitus** (`G YY MM DD SSS C`)
-- **Fiktiivsed eesti nimed** vastavalt soole
-- **Lisaväljad** (valitavad): vanus, nimest tuletatud e-post, aadress (tänav, sihtnumber, linn) ja test-IBAN
-- **Test-IBAN** kehtiva mod-97 kontrollnumbriga, tegelike pangaprefiksitega
+  - *Vigased* — sihilikult katkised koodid (vale kontrollnumber, olematu kuupäev, vale pikkus jm) valideerimise veaharude testimiseks
+  - *Piiripealsed* — keerulised kehtivad juhud, sh **18+ piiri off-by-one** (täpselt 18 täna vs. saab 18 homme), 29. veebruar liigaastal, sajandivahetus, järjekord 000/999
+  - *Ettevõtted* — registrikood, KMKR number, ärinimi, IBAN, aadress
+- **Vanusefilter** — genereeri sihilikult alaealisi (<18) või täisealisi (18+)
+- **Lisaväljad** — vanus, nimest tuletatud e-post, aadress, test-IBAN
 - **Deterministlik seeme** — sama seeme annab alati sama komplekti (korratavad testid)
-- **Eksport** — CSV ja JSON allalaadimine, `INSERT`-lause kopeerimine
-- **Isikukoodi valideerija** — kontrolli üht koodi või kleebi terve loend korraga (pass/fail + põhjus)
-- **IBAN-i kontroll** — mod-97 valideerimine ning riigi, panga, BIC-i ja kontonumbri tuletamine
-- **Telefoninumbri kontroll** — formaadi ja numbritüübi tuvastus (mobiil, lauatelefon, 800/900 teenusnumber, lühinumber, hädaabi) ning E.164 vorming
-- **Sisseehitatud kasutusjuhend** lehel
+- **Eksport** — CSV, JSON, `INSERT`-lause, TSV
+- **Jagatav link** — konfiguratsioon URL-is (`?mode=&seed=&count=&age=`), sobib vearaportisse või CI-sse
+- **ID-kaardi vaade** — esiletõstetud isik stiliseeritud isikutunnistusena (NÄIDIS-vesimärgiga)
 
-## Kasutamine
+### Valideerijad
+- **Isikukood** — üks kood või terve loend. Näitab sugu, sünniaega, **vanust ja 18+ staatust**. Toetab ka sertifikaadi vormi `PNOEE-60001019906`
+- **Registrikood ja KMKR** — tüüp tuvastatakse automaatselt
+- **IBAN** — mod-97 kontroll, riik, pank, BIC, kontonumber
+- **Telefoninumber** — formaat ja numbritüüp
 
-Ava veebiversioon [siit](https://tarmokouhkna.github.io/Eesti-isikukoodi-generaator/) või lae repo alla ja ava `index.html` brauseris. Sõltuvusi pole.
+### e-ID arendajale
+- **SK DEMO testkontod** — kureeritud Mobiil-ID ja Smart-ID testnumbrid koos stsenaariumitega (OK, USER_CANCELLED, TIMEOUT, alla 18 jne)
+- **Valideerija kood** — kopeeritav JavaScript, Python, SQL (PostgreSQL) ja Java
+- **`window.EEID`** — kõik valideerimisfunktsioonid on brauserikonsoolist kättesaadavad
+
+## Oluline: genereeritud kood ≠ töötav e-ID konto
+
+Siin loodud koodid on **matemaatiliselt kehtivad** — need läbivad vormivalideerimise. Aga **nendega ei saa sisse logida**. Mobiil-ID või Smart-ID autentimisvoo testimiseks kasuta SK ID Solutionsi DEMO-keskkonna kontosid:
+
+- [SK-EID/MID wiki — Mobiil-ID testnumbrid](https://github.com/SK-EID/MID/wiki/Test-number-for-automated-testing-in-DEMO)
+- [SK-EID Smart-ID wiki — testkontod](https://github.com/SK-EID/smart-id-documentation/wiki/Environment-technical-parameters)
+- [id.ee — teenuste testimine](https://www.id.ee/artikkel/teenuste-testimine/)
+
+Sertifikaadi väljal `SERIALNUMBER` on isikukood riigi prefiksiga (`PNOEE-60001019906`) — levinud integratsioonivea allikas. Siinne valideerija arvestab sellega.
 
 ## Isikukoodi struktuur
 
@@ -37,6 +50,15 @@ Ava veebiversioon [siit](https://tarmokouhkna.github.io/Eesti-isikukoodi-generaa
 | `YY MM DD` | sünnikuupäev |
 | `SSS` | järjekorranumber (000–999) |
 | `C` | mooduli-11 kontrollnumber |
+
+## Kontrollnumbri algoritmid
+
+| Kood | Pikkus | Algoritm |
+|------|--------|----------|
+| Isikukood | 11 numbrit | mod 11, kaalud 1–9,1 / 3–9,1,2,3 |
+| Registrikood | 8 numbrit | mod 11, kaalud 1–7 / 3–9 |
+| KMKR | EE + 9 numbrit | kaalud 3,7,1 kordusena; kontroll = (10 − summa mod 10) mod 10 |
+| IBAN | 20 märki (EE) | ISO 13616 mod-97 |
 
 ## Eesti pangakoodid (IBAN-i 5.–6. number)
 
@@ -52,24 +74,21 @@ Ava veebiversioon [siit](https://tarmokouhkna.github.io/Eesti-isikukoodi-generaa
 
 Tööriist kontrollib **formaati ja numbritüüpi**. Ta **ei tuvasta isikut ega operaatorit**:
 
-- **Isikut ei saa numbri järgi tuvastada.** Elektroonilise side seadus ja GDPR keelavad sideettevõtjal abonendi andmete avaldamist kolmandale isikule; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
-- **Operaatorit ei saa prefiksist järeldada**, sest numbriliikuvus lubab abonendil operaatorit vahetades numbri kaasa võtta. Numbri tegeliku kuuluvuse saab kontrollida [TTJA numbrikuuluvuse päringust](https://nba.ttja.ee/numbriparing.aspx).
-- Ahistamise või kelmuse korral tee avaldus politseile.
-
-Tööriist koondab selle asemel **ametlikud kontrollilingid**, kust kasutaja saab päringu ise seaduslikult teha:
+- **Isikut ei saa numbri järgi tuvastada.** Elektroonilise side seadus ja GDPR keelavad sideettevõtjal abonendi andmete avaldamist; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
+- **Operaatorit ei saa prefiksist järeldada**, sest numbriliikuvus lubab numbri operaatorite vahel kaasa võtta.
 
 | Allikas | Mida annab |
 |---------|-----------|
-| [TTJA numbrikuuluvuse päring](https://nba.ttja.ee/numbriparing.aspx) | Millisele sideettevõtjale number kuulub (või ei kuulu kellelegi — viide võltsitud numbrile) |
-| [Äriregister](https://ariregister.rik.ee/) | Kontakt, kui number kuulub ettevõttele või FIE-le |
-| [1182 kataloog](https://www.1182.ee/) | Avalikustamisega nõustunud kontaktid (peamiselt ettevõtted) |
+| [TTJA numbrikuuluvuse päring](https://nba.ttja.ee/numbriparing.aspx) | Millisele sideettevõtjale number kuulub |
+| [Äriregister](https://ariregister.rik.ee/) | Kontakt, kui number kuulub ettevõttele |
+| [1182 kataloog](https://www.1182.ee/) | Avalikustamisega nõustunud kontaktid |
 | [Avaldus politseile](https://www.politsei.ee/et/avaldus-politseile) | Ahistamise või kelmuse korral |
 
-Lisaks on lehel lühike **kelmuse-abi juhis** (mida mitte anda, kellele teatada, tõendite säilitamine) ning numbrid: hädaabi **112**, riigiinfo **1247**.
+Hädaabi **112** · Riigiinfo **1247**
 
-Tasulistest „reverse lookup" saitidest tasub hoiduda — andmed on tihti vananenud või välja mõeldud ja kogutud küsitaval õiguslikul alusel.
+## Kasutamine
 
-Eesti numbriseeriad: mobiil 50–59 ja 81–84 (7–8 numbrit), lauatelefon 32–33, 35, 38–39, 43–48, 60–68, 71–79, 88 (7 numbrit), teenusnumbrid 800 (tasuta) ja 900 (tasuline), riigikood +372.
+Ava [veebiversioon](https://tarmokouhkna.github.io/Eesti-isikukoodi-generaator/) või lae repo alla ja ava `index.html` brauseris. Sõltuvusi pole.
 
 ## Litsents
 
