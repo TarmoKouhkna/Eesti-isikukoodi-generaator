@@ -126,6 +126,19 @@
   .note{margin:14px 0 0;padding:11px 12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;font-size:12px;line-height:1.6;color:var(--muted);}
   .note b{color:var(--ink);font-weight:600;}
   .note a{color:var(--accent-ink);}
+  .helpbox{margin-top:16px;padding:15px 16px;border:1px solid var(--line);border-radius:10px;background:linear-gradient(180deg,#fbfcfe,#f5f8fb);}
+  .hb-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-ink);margin-bottom:9px;}
+  .hb-title + .hb-title,.steps + .hb-title{margin-top:16px;}
+  ul.links{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  ul.links li{display:flex;flex-direction:column;gap:1px;font-size:12.5px;}
+  ul.links a{color:var(--accent-ink);font-weight:500;text-decoration:none;}
+  ul.links a:hover{text-decoration:underline;}
+  ul.links span{color:var(--muted);font-size:12px;line-height:1.5;}
+  ol.steps{margin:0;padding-left:18px;font-size:12.5px;line-height:1.55;color:#2b3138;}
+  ol.steps li{margin:5px 0;}
+  ol.steps b{font-weight:600;color:var(--ink);}
+  .hb-nums{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);}
+  .hb-nums b{font-family:var(--mono);color:var(--err);font-weight:600;}
 
   details.guide{overflow:hidden;}
   .guide summary{cursor:pointer;padding:16px 18px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);list-style:none;display:flex;justify-content:space-between;align-items:center;}
@@ -248,12 +261,43 @@
       <input type="text" id="phinput" placeholder="+372 5123 4567" autocomplete="off">
       <div class="vbtnrow"><button class="vbtn" id="phbtn">Kontrolli</button></div>
       <div class="vresult" id="phresult"></div>
+
+      <div class="helpbox">
+        <div class="hb-title">Kahtlane number? Kontrolli ise — ametlikud allikad</div>
+        <ul class="links">
+          <li>
+            <a href="https://nba.ttja.ee/numbriparing.aspx" target="_blank" rel="noopener">TTJA numbrikuuluvuse päring</a>
+            <span>Näitab, millisele sideettevõtjale number kuulub — või et see ei kuulu kellelegi (viitab võltsitud numbrile).</span>
+          </li>
+          <li>
+            <a href="https://ariregister.rik.ee/" target="_blank" rel="noopener">Äriregister</a>
+            <span>Kui number kuulub ettevõttele või FIE-le, leiab kontakti siit.</span>
+          </li>
+          <li>
+            <a href="https://www.1182.ee/" target="_blank" rel="noopener">1182 avalik kataloog</a>
+            <span>Sisaldab neid, kes on avalikustamisega nõustunud — peamiselt ettevõtted ja asutused.</span>
+          </li>
+          <li>
+            <a href="https://www.politsei.ee/et/avaldus-politseile" target="_blank" rel="noopener">Esita avaldus politseile</a>
+            <span>Ahistamise või kelmuse korral. Ainult politsei, prokuratuur või kohus saab operaatorilt numbri omaniku välja nõuda.</span>
+          </li>
+        </ul>
+
+        <div class="hb-title">Kui kahtlustad kelmust</div>
+        <ol class="steps">
+          <li><b>Ära anna midagi.</b> Mitte PIN-koodi, ID-kaardi koode, paroole ega kinnitust panga äpis. Pank ega politsei ei küsi neid kunagi telefoni teel.</li>
+          <li><b>Katkesta ja helista ise tagasi</b> ametlikult numbrilt (panga kodulehelt), mitte sellelt, millelt helistati.</li>
+          <li><b>Teavita panka kohe</b>, kui jõudsid andmeid jagada või makse teha — kiirus on määrav.</li>
+          <li><b>Esita avaldus politseile</b> ja teavita ka oma operaatorit.</li>
+          <li><b>Salvesta tõendid</b> — number, kuupäev, kellaaeg, SMS-i tekst, ekraanipildid.</li>
+        </ol>
+        <div class="hb-nums">Hädaabi <b>112</b> · Riigiinfo <b>1247</b> (sh nõu kelmuse kahtluse korral)</div>
+      </div>
+
       <p class="note">
-        <b>Isikut numbri järgi tuvastada ei saa</b> — elektroonilise side seadus ja GDPR keelavad operaatoril abonendi andmete avaldamise; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
-        Ka <b>operaatorit ei saa prefiksist järeldada</b>, sest numbriliikuvus lubab numbri operaatorite vahel kaasa võtta.
-        Numbri tegeliku kuuluvuse (sideettevõtja) saab kontrollida TTJA numbrikuuluvuse päringust:
-        <a href="https://nba.ttja.ee/numbriparing.aspx" target="_blank" rel="noopener">nba.ttja.ee/numbriparing.aspx</a>.
-        Ahistamise või kelmuse korral tee avaldus politseile (politsei.ee).
+        <b>Isikut numbri järgi tuvastada ei saa.</b> Elektroonilise side seadus ja GDPR keelavad operaatoril abonendi andmete avaldamise kolmandale isikule.
+        Ka <b>operaatorit ei saa prefiksist järeldada</b>, sest numbriliikuvus lubab numbri operaatorite vahel kaasa võtta — seetõttu suunab see tööriist TTJA päringu juurde, mis annab tegeliku vastuse.
+        Tasulistest „reverse lookup" saitidest, mis lubavad numbri järgi nime ja aadressi, tasub hoiduda: andmed on tihti vananenud või välja mõeldud ning kogutud küsitaval õiguslikul alusel.
       </p>
     </div>
   </div>

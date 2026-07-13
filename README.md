@@ -54,7 +54,20 @@ Tööriist kontrollib **formaati ja numbritüüpi**. Ta **ei tuvasta isikut ega 
 
 - **Isikut ei saa numbri järgi tuvastada.** Elektroonilise side seadus ja GDPR keelavad sideettevõtjal abonendi andmete avaldamist kolmandale isikule; neid saavad välja nõuda vaid politsei, prokuratuur või kohus.
 - **Operaatorit ei saa prefiksist järeldada**, sest numbriliikuvus lubab abonendil operaatorit vahetades numbri kaasa võtta. Numbri tegeliku kuuluvuse saab kontrollida [TTJA numbrikuuluvuse päringust](https://nba.ttja.ee/numbriparing.aspx).
-- Ahistamise või kelmuse korral tee avaldus politseile (politsei.ee).
+- Ahistamise või kelmuse korral tee avaldus politseile.
+
+Tööriist koondab selle asemel **ametlikud kontrollilingid**, kust kasutaja saab päringu ise seaduslikult teha:
+
+| Allikas | Mida annab |
+|---------|-----------|
+| [TTJA numbrikuuluvuse päring](https://nba.ttja.ee/numbriparing.aspx) | Millisele sideettevõtjale number kuulub (või ei kuulu kellelegi — viide võltsitud numbrile) |
+| [Äriregister](https://ariregister.rik.ee/) | Kontakt, kui number kuulub ettevõttele või FIE-le |
+| [1182 kataloog](https://www.1182.ee/) | Avalikustamisega nõustunud kontaktid (peamiselt ettevõtted) |
+| [Avaldus politseile](https://www.politsei.ee/et/avaldus-politseile) | Ahistamise või kelmuse korral |
+
+Lisaks on lehel lühike **kelmuse-abi juhis** (mida mitte anda, kellele teatada, tõendite säilitamine) ning numbrid: hädaabi **112**, riigiinfo **1247**.
+
+Tasulistest „reverse lookup" saitidest tasub hoiduda — andmed on tihti vananenud või välja mõeldud ja kogutud küsitaval õiguslikul alusel.
 
 Eesti numbriseeriad: mobiil 50–59 ja 81–84 (7–8 numbrit), lauatelefon 32–33, 35, 38–39, 43–48, 60–68, 71–79, 88 (7 numbrit), teenusnumbrid 800 (tasuta) ja 900 (tasuline), riigikood +372.
 
