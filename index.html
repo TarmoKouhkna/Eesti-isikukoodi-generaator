@@ -187,6 +187,7 @@
         <button data-m="invalid" aria-pressed="false">Vigased</button>
         <button data-m="edge" aria-pressed="false">Piiripealsed</button>
         <button data-m="company" aria-pressed="false">Ettevõtted</button>
+        <button data-m="foreign" aria-pressed="false">Välistöötaja</button>
       </div>
     </div>
     <div class="hint" id="modeHint"></div>
@@ -368,7 +369,13 @@
         <li><b>Vigased</b> &mdash; sihilikult katkised koodid, et testida, kas su valideerimine püüab vead kinni. Iga rea juures näidatakse päris veapõhjust.</li>
         <li><b>Piiripealsed</b> &mdash; keerulised kehtivad juhud: 29. veebruar liigaastal, sajandivahetus, järjekord 000/999, vanim ja tulevikusajand, täna sündinu.</li>
         <li><b>Ettevõtted</b> &mdash; registrikood, KMKR number, ärinimi, IBAN ja aadress.</li>
+        <li><b>Välistöötaja</b> &mdash; kolm identifitseerimise olekut, mille peale HR- ja TÖR-süsteemid kõige sagedamini kukuvad:
+          <b>(1)</b> väliskodanik Eesti isikukoodiga (formaadilt eristamatu kodaniku omast),
+          <b>(2)</b> <b>isikukood puudub</b> &mdash; TÖR lubab töötamise registreerida sünniajaga kuni 5 päevaks, seega <code>isikukood = NULL</code>,
+          <b>(3)</b> välisriigi isikukood. Ekspordis on isikukoodi väli tühi / <code>NULL</code> &mdash; see ongi testi mõte.
+        </li>
       </ul>
+      <p><b>Oluline:</b> isikukood ei tähenda õigust Eestis töötada &mdash; see tuleb eraldi alusest (ajutine kaitse, elamisluba, lühiajalise töötamise registreering) ja võib aeguda, kuigi isikukood jääb alles. Ära tee isikukoodi kohustuslikuks primaarvõtmeks.</p>
       <h4>2. Sätted</h4>
       <ul class="g">
         <li><b>Vanus</b> &mdash; &bdquo;Alaealine&ldquo; või &bdquo;Täisealine&ldquo; genereerib koodid sobiva sünniajaga (18+ kontrolli testimiseks). See tühistab aastavahemiku.</li>
@@ -574,6 +581,56 @@ const CO3=["OÜ","AS","OÜ","OÜ","AS"];
 function translit(s){const m={'õ':'o','ä':'a','ö':'o','ü':'u','š':'s','ž':'z'};return s.toLowerCase().replace(/[õäöüšž]/g,c=>m[c]);}
 function generateAddress(){const c=pick(CITIES),zip=c.p+pad(rnd(1000),3),st=pick(STREETS),h=1+rnd(120);return {tanav:st+' '+h+(RNG()<0.5?('-'+(1+rnd(40))):''),sihtnumber:zip,linn:c.n};}
 function generateCompanyName(){return pick(CO1)+' '+pick(CO2)+' '+pick(CO3);}
+
+/* ---------- VÄLISTÖÖTAJA (TÖR / isikukoodita juhud) ----------
+   Kolm identifitseerimise olekut, mille peale HR/TÖR-süsteemid kõige sagedamini kukuvad.
+   NB! Väliskodanikule antud Eesti isikukood on formaadilt kodaniku omast ERISTAMATU —
+   kodakondsust koodist tuletada ei saa. */
+const FW_NAMES={
+  m:["Oleksandr","Mykola","Dmytro","Serhii","Yurii","Ihor","Hryhorii","V'yacheslav","Rustam","Giorgi"],
+  f:["Iryna","Olha","Kateryna","Nataliia","Tetiana","Yuliia","Sofiia","Oksana","Nigora","Nino"],
+  last:["Kovalenko","Shevchenko","Bondarenko","Tkachenko","Melnyk","Kravchuk","Boiko","Moroz","Lysenko","Marchuk","Rustamov","Beridze","D'Amico","Kuzniecov"]
+};
+const CITIZENSHIP=['UA','UA','UA','MD','BY','GE','UZ','IN','PH','LT','LV','PL'];
+const ID_TYPES=[
+  {k:'ee_kood',  lab:'Eesti isikukood (väliskodanikule antud)', hint:'Formaadilt eristamatu Eesti kodaniku koodist'},
+  {k:'synniaeg', lab:'Isikukood PUUDUB — TÖR-i kanne sünniajaga', hint:'isikukood = NULL. Kanne tuleb täiendada isikukoodiga'},
+  {k:'valis',    lab:'Välisriigi isikukood', hint:'Ei ole Eesti isikukood — ei tohi valideerida EE reeglitega'}
+];
+function generateDocNr(){
+  const L='ABCDEFGHJKLMNPRSTUVWXYZ';
+  return L[rnd(L.length)]+L[rnd(L.length)]+pad(rnd(1000000),6);
+}
+function generateForeignWorker(opts,forceType){
+  const t=forceType||pick(ID_TYPES).k;
+  const male=RNG()<0.5;
+  const ees=pick(male?FW_NAMES.m:FW_NAMES.f),perek=pick(FW_NAMES.last);
+  const kod=pick(CITIZENSHIP);
+  const meta=ID_TYPES.find(x=>x.k===t);
+  const w={foreign:true,idType:t,idLabel:meta.lab,idHint:meta.hint,
+    eesnimi:ees,perekonnanimi:perek,name:ees+' '+perek,
+    isMale:male,kodakondsus:kod,dokument:generateDocNr()};
+
+  const ty=new Date().getFullYear();
+  const by=(ty-60)+rnd(60-18+1);           // realistlik tööiga: ~18–60 aastat
+  const bm=1+rnd(12), bd=1+rnd(daysInMonth(by,bm));
+  w.year=by;w.month=bm;w.day=bd;
+  w.synniaeg=by+'-'+pad(bm,2)+'-'+pad(bd,2);
+
+  if(t==='ee_kood'){
+    w.isikukood=makeCode(by,bm,bd,rnd(1000),male);
+  } else if(t==='synniaeg'){
+    w.isikukood=null;                       // <-- see ongi mõte: NULL
+    w.torTahtaeg='kuni 5 päeva';
+  } else {
+    w.isikukood=null;
+    w.valiskood=(kod==='LT'||kod==='LV'?kod:'XX')+'-'+pad(rnd(100000000),8)+rnd(10);
+  }
+  if(opts.addr){const a=generateAddress();w.tanav=a.tanav;w.sihtnumber=a.sihtnumber;w.linn=a.linn;}
+  if(opts.iban)w.iban=generateIBAN();
+  if(opts.mail)w.epost=translit(ees.replace(/'/g,''))+'.'+translit(perek.replace(/'/g,''))+'@example.com';
+  return w;
+}
 
 /* ---------- koodi ehitamine ---------- */
 function daysInMonth(y,m){return new Date(y,m,0).getDate();}
@@ -892,7 +949,8 @@ const HINTS={
   valid:'Terviklikud fiktiivsed identiteedid kehtiva kontrollnumbriga.',
   invalid:'Sihilikult katkised koodid — valideerija näitab iga vea põhjust.',
   edge:'Fikseeritud keerulised, kuid kehtivad juhud. Kogus ja seeme ei mõjuta.',
-  company:'Ettevõtted: registrikood, KMKR number, ärinimi, IBAN ja aadress.'
+  company:'Ettevõtted: registrikood, KMKR number, ärinimi, IBAN ja aadress.',
+  foreign:'Välistöötajad: isikukoodiga, isikukoodita (TÖR-i sünniaja-kanne, isikukood = NULL) ja välisriigi koodiga. Sunnib süsteemi tulema toime puuduva isikukoodiga.'
 };
 function segInit(elId,attr,cb){
   const el=$(elId);
@@ -903,11 +961,11 @@ function segInit(elId,attr,cb){
   });
 }
 function syncRows(){
-  const isCompany=mode==='company', isValid=mode==='valid';
+  const isCompany=mode==='company', isValid=mode==='valid', isForeign=mode==='foreign';
   $('rowGender').style.display=isValid?'':'none';
   $('rowAge').style.display=isValid?'':'none';
   $('rowYears').style.display=(isValid&&ageMode==='any')?'':'none';
-  $('fieldsRow').style.display=(isValid||isCompany)?'':'none';
+  $('fieldsRow').style.display=(isValid||isCompany||isForeign)?'':'none';
 }
 segInit('mode','m',v=>{mode=v;$('modeHint').textContent=HINTS[v];syncRows();});
 segInit('gender','g',v=>{genderPref=v;});
@@ -945,6 +1003,22 @@ renderSK();
 function toRows(items){
   if(!items.length) return [{}];
   if(items[0].special) return items.map(it=>({kood:it.code,kirjeldus:it.label}));
+  if(items[0].foreign) return items.map(it=>{
+    const r={
+      isikukood:it.isikukood||'',            // TÜHI, kui koodi pole — see ongi testi mõte
+      valiskood:it.valiskood||'',
+      eesnimi:it.eesnimi,perekonnanimi:it.perekonnanimi,
+      sugu:it.isMale?'M':'N',
+      synniaeg:it.synniaeg,
+      kodakondsus:it.kodakondsus,
+      dokument:it.dokument,
+      identifitseerimine:it.idType
+    };
+    if(it.epost)r.epost=it.epost;
+    if(it.tanav){r.aadress=it.tanav;r.sihtnumber=it.sihtnumber;r.linn=it.linn;}
+    if(it.iban)r.iban=it.iban;
+    return r;
+  });
   if(items[0].company) return items.map(it=>{
     const r={arinimi:it.arinimi,registrikood:it.registrikood,kmkr:it.kmkr};
     if(it.epost)r.epost=it.epost;
@@ -963,7 +1037,7 @@ function toRows(items){
 }
 function toTSV(rs){const c=Object.keys(rs[0]);return [c.join('\t'),...rs.map(r=>c.map(k=>r[k]).join('\t'))].join('\n');}
 function toCSV(rs){const c=Object.keys(rs[0]);const e=v=>/[",\n]/.test(v)?'"'+String(v).replace(/"/g,'""')+'"':v;return [c.join(','),...rs.map(r=>c.map(k=>e(r[k])).join(','))].join('\n');}
-function toSQL(rs){const c=Object.keys(rs[0]);const q=v=>"'"+String(v).replace(/'/g,"''")+"'";const t=(mode==='company')?'ettevotted':'isikud';return 'INSERT INTO '+t+' ('+c.join(', ')+') VALUES\n'+rs.map(r=>'  ('+c.map(k=>q(r[k])).join(', ')+')').join(',\n')+';';}
+function toSQL(rs){const c=Object.keys(rs[0]);const q=v=>(v===''||v==null)?'NULL':"'"+String(v).replace(/'/g,"''")+"'";const t=(mode==='company')?'ettevotted':(mode==='foreign')?'tootajad':'isikud';return 'INSERT INTO '+t+' ('+c.join(', ')+') VALUES\n'+rs.map(r=>'  ('+c.map(k=>q(r[k])).join(', ')+')').join(',\n')+';';}
 function download(name,text,mime){const b=new Blob([text],{type:mime});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);}
 
 /* ---------- ID-kaart ---------- */
@@ -1033,6 +1107,32 @@ function renderCompanies(items){
     li.appendChild(a);ul.appendChild(li);
   });
 }
+function renderForeign(items){
+  current=items;
+  $('output').hidden=false;
+  $('hero').style.display='none';$('anatomy').style.display='none';
+  $('listCap').textContent=items.length+(items.length===1?' töötaja':' töötajat');
+  const ul=$('list');ul.innerHTML='';
+  items.forEach(it=>{
+    const li=document.createElement('li');
+    const noCode=!it.isikukood;
+    const codeTxt=it.isikukood||(it.valiskood?it.valiskood:'— isikukood puudub —');
+    let e='<span class="val"'+(noCode?' style="color:var(--muted);"':'')+'>'+esc(codeTxt)+'</span>'+
+      '<span class="who">'+esc(it.name)+' · '+it.kodakondsus+' · '+(it.isMale?'M':'N')+'</span>'+
+      '<span class="line">sünd '+it.synniaeg+' · dokument '+it.dokument+'</span>'+
+      '<span class="line"><span class="badge '+(noCode?'b-warn':'b-ok')+'">'+esc(it.idLabel)+'</span></span>'+
+      '<span class="line" style="font-size:11.5px;">'+esc(it.idHint)+'</span>';
+    if(it.tanav)e+='<span class="line">'+esc(it.tanav+', '+it.sihtnumber+' '+it.linn)+'</span>';
+    if(it.iban)e+='<span class="iban">'+it.iban+'</span>';
+    li.innerHTML='<div class="entry">'+e+'</div>';
+    const a=document.createElement('div');a.className='actions';
+    if(it.isikukood)a.appendChild(mkBtn('kood',it.isikukood));
+    if(it.valiskood)a.appendChild(mkBtn('väliskood',it.valiskood));
+    a.appendChild(mkBtn('nimi',it.name));
+    a.appendChild(mkBtn('sünniaeg',it.synniaeg));
+    li.appendChild(a);ul.appendChild(li);
+  });
+}
 function renderSpecial(items,kind){
   current=items;
   $('output').hidden=false;
@@ -1077,6 +1177,10 @@ function run(){
     renderSpecial(edgeCases().map(e=>({code:e.code,label:e.juhtum,special:true})),'edge');
   } else if(mode==='company'){
     renderCompanies(Array.from({length:count},()=>generateCompany(opts)));
+  } else if(mode==='foreign'){
+    // tsükeldame läbi kolme tüübi, et komplektis oleks kindlasti ka NULL-koodiga töötaja
+    const types=['ee_kood','synniaeg','valis'];
+    renderForeign(Array.from({length:count},(_,i)=>generateForeignWorker(opts,types[i%3])));
   } else {
     render(Array.from({length:count},()=>generateOne(yFrom,yTo,genderPref,opts,ageMode)));
   }
@@ -1147,7 +1251,7 @@ $('vbtn').addEventListener('click',()=>{
         (r.isAdult?'':' <span class="badge b-warn">alaealine</span>')+'</div><dl class="kv">'+
         kv.map(k=>'<dt>'+k[0]+'</dt><dd>'+k[1]+'</dd>').join('')+'</dl>'+
         '<p class="note"><b>Järjekorranumber '+pad(r.serial,3)+'</b> eristab samal päeval sündinud sama soost inimesi.'+
-        (sn?' '+esc(sn):'')+'<br><b>Sünnikohta ega kodakondsust isikukoodist tuletada ei saa</b> — koodis on ainult sugu, sünniaeg ja järjekorranumber.</p>';
+        (sn?' '+esc(sn):'')+'<br><b>Sünnikohta, kodakondsust ega õigust Eestis töötada isikukoodist tuletada ei saa</b> — koodis on ainult sugu, sünniaeg ja järjekorranumber. Väliskodanikule antud isikukood on formaadilt eristamatu.</p>';
     } else {
       vres.innerHTML='<span class="badge b-bad">vigane</span>'+esc(r.error);
     }

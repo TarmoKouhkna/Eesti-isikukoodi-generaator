@@ -14,6 +14,7 @@ Veebipõhine tööriist Eesti isikukoodide, ettevõtte registrikoodide ja fiktii
   - *Vigased* — sihilikult katkised koodid (vale kontrollnumber, olematu kuupäev, vale pikkus jm) valideerimise veaharude testimiseks
   - *Piiripealsed* — keerulised kehtivad juhud, sh **18+ piiri off-by-one** (täpselt 18 täna vs. saab 18 homme), 29. veebruar liigaastal, sajandivahetus, järjekord 000/999
   - *Ettevõtted* — registrikood, KMKR number, ärinimi, IBAN, aadress
+  - *Välistöötaja* — kolm identifitseerimise olekut: väliskodanik Eesti isikukoodiga, **isikukoodita** (TÖR-i sünniaja-kanne, `isikukood = NULL`) ja välisriigi koodiga
 - **Vanusefilter** — genereeri sihilikult alaealisi (<18) või täisealisi (18+)
 - **Lisaväljad** — vanus, nimest tuletatud e-post, aadress, test-IBAN
 - **Deterministlik seeme** — sama seeme annab alati sama komplekti (korratavad testid)
@@ -41,6 +42,18 @@ Siin loodud koodid on **matemaatiliselt kehtivad** — need läbivad vormivalide
 - [id.ee — teenuste testimine](https://www.id.ee/artikkel/teenuste-testimine/)
 
 Sertifikaadi väljal `SERIALNUMBER` on isikukood riigi prefiksiga (`PNOEE-60001019906`) — levinud integratsioonivea allikas. Siinne valideerija arvestab sellega.
+
+## Isikukood ≠ õigus töötada
+
+Levinud viga HR- ja TÖR-süsteemides on teha isikukoodist kohustuslik primaarvõti. See ei tööta:
+
+- Töötajal **ei pruugi isikukoodi veel olla** — TÖR lubab töötamise registreerida sünniajaga kuni 5 päevaks ja kanne täiendatakse hiljem
+- Väliskodanikule antud Eesti isikukood on **formaadilt eristamatu** kodaniku omast — kodakondsust koodist tuletada ei saa
+- Õigus töötada tuleb **eraldi alusest** (ajutine kaitse, elamisluba, lühiajalise töötamise registreering) ja võib **aeguda**, kuigi isikukood jääb alles
+
+Soovitused: sisemine UUID primaarvõtmeks, `isikukood` nullable, identifitseerimise staatus eraldi väljana, ja töötamise õiguslik alus koos kehtivuse lõppkuupäevaga omaette mudelina.
+
+Režiim **Välistöötaja** genereerib testandmed täpselt nende juhtude jaoks.
 
 ## Isikukoodi struktuur
 
